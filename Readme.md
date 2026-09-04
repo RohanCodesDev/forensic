@@ -65,8 +65,15 @@ Do NOT just generate the entire project at once. I want to **learn while buildin
 * **Why It Matters:** Visualizing the physical geographical route of an email across continents immediately exposes impossible travel, foreign server relays, or bulletproof hosting providers (such as known Tor exit nodes or rogue ASNs) that legitimate internal corporate emails would never route through.
 
 ### ✅ PHASE 9 — Threat Intelligence Integration (CTI)
-* **What We Built:** Implemented a mock Global Threat Intelligence feed in `threat.service.ts` (simulating integrations with AbuseIPDB, URLhaus, and VirusTotal) to automatically cross-reference discovered IPs, domains, and URLs against known threat vectors. Updated `email.controller.ts` to coordinate this and exposed the findings in a dedicated "Global Threat Intelligence Feeds" section in the Next.js UI.
+* **What We Built:** Implemented a Global Threat Intelligence feed in `threat.service.ts` to automatically cross-reference discovered IPs, domains, and URLs against known threat vectors. Updated `email.controller.ts` to coordinate this and exposed the findings in a dedicated "Global Threat Intelligence Feeds" section in the Next.js UI.
 * **Why It Matters:** Raw observables (an IP address or URL) mean nothing without context. By running observables against Cyber Threat Intelligence (CTI) databases, we instantly surface Indicators of Compromise (IOCs) such as known Phishing domains, Spam Relays, or Tor Exit Nodes, drastically reducing investigation time.
+
+### ✅ INTERLUDE — Architecture, Security Limits & Live APIs
+* **What We Built:** Before moving to AI, we cleared technical debt. We refactored the massive `email.controller.ts` by extracting all analysis logic into a dedicated `analysis.service.ts` master orchestrator. We added strict memory upload limits (5MB) via `multer`. We also upgraded the `threat.service.ts` to query the live **AbuseIPDB API** using a secure `.env` key, rather than relying on a static offline database.
+* **Why It Matters:** 
+  * **Architecture:** Adhering to the Single Responsibility Principle prevents our controllers from becoming tangled "God Files".
+  * **Security:** Enforcing file size limits protects our Node.js server from memory-exhaustion Denial of Service (DoS) attacks.
+  * **Live CTI APIs:** Threat actors rotate infrastructure rapidly (using cloud providers). A static "blocklist" downloaded locally becomes obsolete in hours. By querying live APIs like AbuseIPDB, our platform connects to a crowdsourced, real-time global network of security reports, ensuring our intel is never out of date.
 
 ---
 
