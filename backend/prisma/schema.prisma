@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Email {
+  id              String   @id @default(uuid())
+  filename        String
+  from            String
+  to              String
+  cc              String?
+  subject         String
+  date            String?
+  messageId       String?
+  replyTo         String?
+  returnPath      String?
+  textBodySnippet String?
+  htmlBodyExists  Boolean  @default(false)
+  attachmentCount Int      @default(0)
+  receivedHeaders Json?    // Stores the array of hop infrastructure
+  spfResult       String?  @default("UNKNOWN")
+  dkimResult      String?  @default("UNKNOWN")
+  dmarcResult     String?  @default("UNKNOWN")
+  createdAt       DateTime @default(now())
+}

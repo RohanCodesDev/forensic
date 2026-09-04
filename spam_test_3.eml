@@ -1,0 +1,12 @@
+From: "Bank of America" <security@bankofamerica.com>
+To: user@example.com
+Subject: Immediate Action Required: Account Compromised
+Authentication-Results: mx.google.com; spf=fail (google.com: domain of security@bankofamerica.com does not designate 192.0.2.1 as permitted sender) smtp.mailfrom=security@bankofamerica.com; dkim=fail (signature did not verify); dmarc=fail (p=REJECT dis=REJECT) header.from=bankofamerica.com
+Message-ID: <202609041400.12345@bankofamerica.com>
+Date: Fri, 04 Sep 2026 14:10:00 +0000
+Content-Type: text/plain; charset="utf-8"
+
+Dear Customer,
+
+Your account has been temporarily restricted due to unauthorized login attempts.
+Please log in immediately to restore access.

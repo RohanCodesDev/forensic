@@ -1,0 +1,15 @@
+From: "PayPal Security" <security@paypa1.com>
+To: user@example.com
+Subject: Notice: Your Account Access Is Limited
+Date: Fri, 04 Sep 2026 14:15:00 +0000
+Content-Type: text/plain; charset="utf-8"
+
+Dear Customer,
+
+We noticed unusual logins from a new device.
+Please log in to your dashboard to resolve this immediately.
+
+https://secure-login.paypa1.com/resolve
+
+Thanks,
+PayPal Security Team
