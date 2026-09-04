@@ -56,6 +56,18 @@ Do NOT just generate the entire project at once. I want to **learn while buildin
 * **What We Built:** Created `url.service.ts` to extract embedded hyperlinks from plain text and HTML emails using RegEx. Analyzes domains for risk factors: raw IP routing, URL shorteners (like `bit.ly`), HTTP downgrades, suspicious path keywords, and brand impersonation in paths. Exposed the data visually in the frontend.
 * **Why It Matters:** Attackers often mask malicious destinations via URL shorteners or raw IPs to bypass automated spam filters. Highlighting these tactics instantly reveals the true, dangerous destination to the forensic analyst.
 
+### ✅ PHASE 7 — IP & SMTP Route Analysis (Received Chain Forensics & Origin Identification)
+* **What We Built:** Built `route.service.ts` to parse the chronological chain of `Received:` headers from bottom-to-top (Hop 1 Origin to Final Destination MX). Extracted relay IPs, hostnames, transfer protocols, and calculated hop latency delays while identifying the true public Originating IP. Added an interactive **SMTP Relay Hop Chain & Origin Trace** timeline panel to the frontend.
+* **Why It Matters:** Attackers can easily spoof header display names like `From: support@paypal.com`, but cannot alter the physical TCP/IP connection logs recorded by intermediate and destination mail transfer agents. Reverse-parsing the `Received:` headers reveals the physical server origin and identifies forged headers or time-travel clock skews.
+
+### ✅ PHASE 8 — IP Geolocation & Leaflet Interactive Map Visualization
+* **What We Built:** Created `geo.service.ts` to resolve public IP addresses into geographic metadata (Country, Region, City, Coordinates [lat, lon], ISP, Autonomous System Number ASN, Timezone) with an offline-resilient caching fallback. Built an interactive dark-themed Leaflet Map component (`GeoRouteMap.tsx`) with dynamic SSR-safe rendering, custom animated hop marker badges, rich hover popups, and route polylines connecting the origin server to the destination MX across the globe.
+* **Why It Matters:** Visualizing the physical geographical route of an email across continents immediately exposes impossible travel, foreign server relays, or bulletproof hosting providers (such as known Tor exit nodes or rogue ASNs) that legitimate internal corporate emails would never route through.
+
+### ✅ PHASE 9 — Threat Intelligence Integration (CTI)
+* **What We Built:** Implemented a mock Global Threat Intelligence feed in `threat.service.ts` (simulating integrations with AbuseIPDB, URLhaus, and VirusTotal) to automatically cross-reference discovered IPs, domains, and URLs against known threat vectors. Updated `email.controller.ts` to coordinate this and exposed the findings in a dedicated "Global Threat Intelligence Feeds" section in the Next.js UI.
+* **Why It Matters:** Raw observables (an IP address or URL) mean nothing without context. By running observables against Cyber Threat Intelligence (CTI) databases, we instantly surface Indicators of Compromise (IOCs) such as known Phishing domains, Spam Relays, or Tor Exit Nodes, drastically reducing investigation time.
+
 ---
 
 # 1. Project Goal

@@ -1,0 +1,28 @@
+Received: from relay-eu1.gateway.org (relay-eu1.gateway.org [198.51.100.25])
+	by mx.victim-company.com (Postfix) with ESMTPS id 4ZyX90021
+	for <security@victim-company.com>; Fri, 04 Sep 2026 14:15:35 +0000
+Received: from smtp.bullet-relay.net (smtp.bullet-relay.net [185.220.101.5])
+	by relay-eu1.gateway.org (8.14.4/8.14.4) with ESMTP id 12345ABCD
+	for <security@victim-company.com>; Fri, 04 Sep 2026 14:15:25 +0000
+Received: from [192.168.1.105] (unknown [185.220.101.5])
+	by smtp.bullet-relay.net (Postfix) with ESMTPA id 98765QWER;
+	Fri, 04 Sep 2026 14:15:15 +0000
+From: "IT Support Desk" <helpdesk@support-service-ticket.com>
+To: <security@victim-company.com>
+Subject: URGENT: Action Required - Account Verification Sequence
+Date: Fri, 04 Sep 2026 14:15:15 +0000
+Message-ID: <98765-audit-alert@support-service-ticket.com>
+Reply-To: security-eval@attacker-relay.cc
+Return-Path: bounce@attacker-relay.cc
+Authentication-Results: mx.victim-company.com; spf=fail; dkim=none; dmarc=fail
+MIME-Version: 1.0
+Content-Type: text/html; charset=UTF-8
+
+<html>
+<body>
+<p>Dear Employee,</p>
+<p>Your mailbox quota has exceeded 98%. Please synchronize your credentials via the server portal below:</p>
+<p><a href="http://185.220.101.5/login/office365-verify">Verify Office365 Account Now</a></p>
+<p>Thank you,<br/>Internal Helpdesk</p>
+</body>
+</html>

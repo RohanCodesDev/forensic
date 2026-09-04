@@ -1,6 +1,9 @@
 import { useState } from "react";
 import Head from "next/head";
+import dynamic from "next/dynamic";
 import { Lexend } from "next/font/google";
+
+const GeoRouteMap = dynamic(() => import("../components/GeoRouteMap"), { ssr: false });
 
 const lexend = Lexend({ subsets: ["latin"] });
 
@@ -31,8 +34,9 @@ export default function Home() {
     formData.append("file", file);
 
     try {
-      // Default to the live Vercel backend so the deployed frontend works out of the box.
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://forensic-mauve.vercel.app";
+      // Auto-detect local development vs deployed Vercel backend
+      const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || (isLocalhost ? "http://localhost:8000" : "https://forensic-mauve.vercel.app");
       const response = await fetch(`${API_URL}/api/emails/upload`, {
         method: "POST",
         body: formData,
@@ -65,7 +69,7 @@ export default function Home() {
               Forensic_Mail <span className="text-gray-600 font-light">||</span> SYSTEM.CORE
             </h1>
             <p className="text-gray-500 text-sm tracking-widest uppercase ml-6">
-              [PHASE_2] :: MIME_DECODER_AND_EXTRACTION
+              [PHASE_8] :: IP_GEOLOCATION_AND_MAP_VISUALIZATION
             </p>
           </div>
         </header>
@@ -341,6 +345,200 @@ export default function Home() {
                             </button>
                           )}
                           {!isRisky && <span className="text-[10px] bg-emerald-950/30 text-emerald-500 px-2 py-1 rounded border border-emerald-900 font-mono">NEUTRAL</span>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* PHASE 9: Threat Intelligence (CTI) */}
+            {result.analysis && result.analysis.threatIntel && result.analysis.threatIntel.length > 0 && (
+              <div className="bg-[#050505] border border-gray-800 p-6 rounded-lg space-y-4">
+                <div className="border-b border-gray-800 pb-3 mb-4">
+                  <h3 className="text-white font-semibold flex items-center gap-2">
+                    <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    Global Threat Intelligence Feeds (CTI)
+                  </h3>
+                  <p className="text-xs text-gray-500 font-mono mt-1">Cross-referencing IPs, Domains, and URLs against AbuseIPDB, URLhaus, and VirusTotal</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {result.analysis.threatIntel.map((threat: any, idx: number) => (
+                    <div key={idx} className={`p-3 rounded-md border flex flex-col justify-between ${
+                      threat.isMalicious ? 'bg-rose-950/20 border-rose-900/50' : 'bg-black border-gray-800'
+                    }`}>
+                      <div className="flex items-start justify-between mb-2">
+                        <span className={`text-xs font-mono font-bold truncate pr-2 ${threat.isMalicious ? 'text-rose-400' : 'text-gray-300'}`}>
+                          {threat.value}
+                        </span>
+                        <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono uppercase shrink-0 ${
+                          threat.type === 'IP' ? 'bg-blue-900/50 text-blue-300' : 
+                          threat.type === 'URL' ? 'bg-purple-900/50 text-purple-300' : 
+                          'bg-amber-900/50 text-amber-300'
+                        }`}>
+                          {threat.type}
+                        </span>
+                      </div>
+                      <div className="flex items-end justify-between">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] text-gray-500 uppercase">{threat.source}</span>
+                          <span className="text-xs text-gray-400 truncate w-32">{threat.categories.join(', ')}</span>
+                        </div>
+                        {threat.isMalicious ? (
+                          <span className="text-xs bg-rose-900 text-rose-200 px-2 py-0.5 rounded font-bold animate-pulse">MALICIOUS</span>
+                        ) : (
+                          <span className="text-xs text-emerald-500">CLEAN</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* PHASE 7 & 8: SMTP Route & Interactive Geolocation Map */}
+            {result.analysis && result.analysis.routeAnalysis && (
+              <div className="bg-[#0a0a0a] border border-gray-800 p-6 rounded-lg space-y-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-gray-800 pb-4 gap-2">
+                  <div>
+                    <h3 className="text-white font-semibold flex items-center gap-2">
+                      <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                      SMTP Relay Hop Chain & Global Route Map
+                    </h3>
+                    <p className="text-xs text-gray-500 font-mono mt-1">Chronological MTA relay hops & geographic infrastructure map</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="bg-blue-950/40 border border-blue-800/60 px-3 py-1.5 rounded-md text-xs font-mono">
+                      <span className="text-gray-400">Total Hops: </span>
+                      <span className="text-blue-400 font-bold">{result.analysis.routeAnalysis.totalHops}</span>
+                    </div>
+                    {result.analysis.routeAnalysis.totalDeliveryTimeSeconds !== null && (
+                      <div className="bg-zinc-900 border border-zinc-700 px-3 py-1.5 rounded-md text-xs font-mono">
+                        <span className="text-gray-400">Transit Time: </span>
+                        <span className="text-emerald-400 font-bold">{result.analysis.routeAnalysis.totalDeliveryTimeSeconds}s</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Originating Public IP Card with Geo Details */}
+                <div className="bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-purple-950/20 border border-blue-900/60 p-4 rounded-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] uppercase tracking-wider text-blue-400 font-mono font-bold">
+                        Identified Originating Server (Entry Point)
+                      </span>
+                      {result.analysis.routeAnalysis.originatingGeo && (
+                        <span className="text-[10px] bg-blue-900/60 text-blue-200 px-2 py-0.5 rounded font-mono border border-blue-700">
+                          {result.analysis.routeAnalysis.originatingGeo.city}, {result.analysis.routeAnalysis.originatingGeo.country} ({result.analysis.routeAnalysis.originatingGeo.countryCode})
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-lg font-mono font-bold text-white">
+                        {result.analysis.routeAnalysis.originatingIp || "None detected"}
+                      </span>
+                      {result.analysis.routeAnalysis.originatingHost && (
+                        <span className="text-xs text-gray-400 font-mono">
+                          ({result.analysis.routeAnalysis.originatingHost})
+                        </span>
+                      )}
+                    </div>
+                    {result.analysis.routeAnalysis.originatingGeo && (
+                      <p className="text-xs text-gray-400 font-mono">
+                        <span className="text-gray-500">ISP / AS: </span>
+                        <span className="text-gray-300">{result.analysis.routeAnalysis.originatingGeo.isp || result.analysis.routeAnalysis.originatingGeo.org}</span>
+                        <span className="text-gray-600"> • </span>
+                        <span className="text-gray-400">{result.analysis.routeAnalysis.originatingGeo.as}</span>
+                      </p>
+                    )}
+                  </div>
+                  <button 
+                    onClick={() => setSelectedBadge({
+                      title: "ORIGINATING PUBLIC IP & GEOLOCATION", 
+                      description: "This is the very first public, internet-routable IP address recorded in the SMTP chain. Regardless of what name is displayed in the 'From:' field, this represents the actual host machine that injected the email into the public internet."
+                    })}
+                    className="text-xs bg-blue-900/50 hover:bg-blue-800 text-blue-300 px-3 py-1.5 rounded border border-blue-700 font-mono transition-colors shrink-0"
+                  >
+                    Forensic Significance ⓘ
+                  </button>
+                </div>
+
+                {/* PHASE 8: Interactive Leaflet Map Route */}
+                <div className="pt-2">
+                  <GeoRouteMap hops={result.analysis.routeAnalysis.hops} />
+                </div>
+
+                {/* Interactive Hop Timeline */}
+                <div className="space-y-3 pt-4 border-t border-gray-900 relative before:absolute before:inset-0 before:top-6 before:left-6 before:w-0.5 before:bg-gradient-to-b before:from-blue-500 before:via-purple-700 before:to-emerald-500">
+                  {result.analysis.routeAnalysis.hops.map((hop: any, idx: number) => {
+                    const isFirst = idx === 0;
+                    const isLast = idx === result.analysis.routeAnalysis.hops.length - 1;
+                    return (
+                      <div key={idx} className="relative pl-12">
+                        {/* Hop Marker Node */}
+                        <div className={`absolute left-4 -translate-x-1/2 top-4 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold font-mono border ${
+                          isFirst 
+                            ? 'bg-blue-600 border-blue-400 text-white shadow-[0_0_8px_rgba(59,130,246,0.8)]' 
+                            : isLast 
+                              ? 'bg-emerald-600 border-emerald-400 text-white shadow-[0_0_8px_rgba(16,185,129,0.8)]'
+                              : 'bg-purple-900 border-purple-500 text-gray-200'
+                        }`}>
+                          {hop.hopNumber}
+                        </div>
+
+                        <div className="bg-[#050505] border border-gray-800 hover:border-gray-700 p-4 rounded-md transition-colors space-y-2">
+                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-xs font-mono font-bold text-white">
+                                {isFirst ? "HOP 1 (ORIGIN ENTRY)" : isLast ? `HOP ${hop.hopNumber} (DESTINATION MX)` : `HOP ${hop.hopNumber} (RELAY)`}
+                              </span>
+                              {hop.protocol && (
+                                <span className="text-[10px] bg-zinc-800 text-zinc-300 px-1.5 py-0.5 rounded font-mono">
+                                  {hop.protocol}
+                                </span>
+                              )}
+                              {hop.ip && (
+                                <span className={`text-[10px] px-2 py-0.5 rounded font-mono border ${
+                                  hop.isPrivateIp 
+                                    ? 'bg-zinc-900 text-zinc-500 border-zinc-800' 
+                                    : 'bg-blue-950/60 text-blue-300 border-blue-800'
+                                }`}>
+                                  IP: {hop.ip} {hop.isPrivateIp ? '(LAN/Private)' : '(Public)'}
+                                </span>
+                              )}
+                              {hop.geo && !hop.isPrivateIp && (
+                                <span className="text-[10px] bg-indigo-950/60 text-indigo-300 border border-indigo-800 px-2 py-0.5 rounded font-mono">
+                                  📍 {hop.geo.city}, {hop.geo.country}
+                                </span>
+                              )}
+                            </div>
+                            {hop.delaySeconds !== null && (
+                              <span className={`text-xs font-mono ${hop.delaySeconds < 0 ? 'text-rose-400 font-bold animate-pulse' : 'text-gray-400'}`}>
+                                Hop Latency: {hop.delaySeconds >= 0 ? `+${hop.delaySeconds}s` : `${hop.delaySeconds}s (ANOMALY)`}
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs font-mono text-gray-400">
+                            <div><span className="text-gray-500">From: </span><span className="text-gray-200">{hop.fromHost || "Not specified"}</span></div>
+                            <div><span className="text-gray-500">By: </span><span className="text-gray-200">{hop.byHost || "Not specified"}</span></div>
+                          </div>
+
+                          {hop.geo && !hop.isPrivateIp && (
+                            <div className="text-[11px] font-mono text-gray-400 grid grid-cols-1 md:grid-cols-2 gap-1 bg-zinc-950/80 p-2 rounded border border-zinc-900">
+                              <div><span className="text-gray-500">ISP/Org: </span><span className="text-gray-300">{hop.geo.isp || hop.geo.org}</span></div>
+                              <div><span className="text-gray-500">ASN / Coords: </span><span className="text-gray-300">{hop.geo.as} [{hop.geo.lat.toFixed(2)}, {hop.geo.lon.toFixed(2)}]</span></div>
+                            </div>
+                          )}
+
+                          {hop.timestamp && (
+                            <div className="text-[11px] font-mono text-gray-500 flex items-center gap-1.5 pt-1 border-t border-gray-900">
+                              <svg className="w-3.5 h-3.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                              <span>{hop.timestamp}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
