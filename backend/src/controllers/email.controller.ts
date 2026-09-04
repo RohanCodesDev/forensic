@@ -52,7 +52,7 @@ export const uploadEmail = async (req: Request, res: Response): Promise<void> =>
 
     // Extract attachment details and flag risky extensions
     const riskyExtensions = ['.exe', '.scr', '.vbs', '.bat', '.cmd', '.js', '.ps1', '.iso', '.img', '.jar', '.hta', '.cpl', '.docm', '.xlsm'];
-    const attachments = (parsed.attachments || []).map((att) => {
+    const attachments = (parsed.attachments || []).map((att: any) => {
       const filename = att.filename || 'unnamed_attachment';
       const ext = filename.substring(filename.lastIndexOf('.')).toLowerCase();
       const isRisky = riskyExtensions.includes(ext);
@@ -138,9 +138,9 @@ export const uploadEmail = async (req: Request, res: Response): Promise<void> =>
     }
 
     // 7. Risky Attachments
-    const riskyAtts = attachments.filter(a => a.isRisky);
+    const riskyAtts = attachments.filter((a: any) => a.isRisky);
     if (riskyAtts.length > 0) {
-      anomalies.push(`HIGH RISK ATTACHMENTS DETECTED: Contains ${riskyAtts.length} potentially executable/malicious attachment file(s): ${riskyAtts.map(a => a.filename).join(', ')}.`);
+      anomalies.push(`HIGH RISK ATTACHMENTS DETECTED: Contains ${riskyAtts.length} potentially executable/malicious attachment file(s): ${riskyAtts.map((a: any) => a.filename).join(', ')}.`);
     }
 
     // PHASE 5: Domain Analysis & Brand Impersonation
