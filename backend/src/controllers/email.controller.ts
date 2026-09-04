@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { simpleParser } from 'mailparser';
 import { PrismaClient } from '@prisma/client';
 import { analyzeSenderDomain } from '../services/domain.service';
+import { analyzeUrls } from '../services/url.service';
 
 const prisma = new PrismaClient();
 
@@ -155,6 +156,16 @@ export const uploadEmail = async (req: Request, res: Response): Promise<void> =>
       anomalies.push(...domainAnalysis.anomalies);
     }
 
+    // PHASE 6: URL Extraction & Risk Analysis
+    const textSnippet = parsed.text || '';
+    const htmlSnippet = parsed.html || (parsed.textAsHtml || '');
+    const urlAnalysis = analyzeUrls(textSnippet, htmlSnippet);
+    
+    const riskyUrls = urlAnalysis.filter(u => u.riskScore >= 2);
+    if (riskyUrls.length > 0) {
+      anomalies.push(`SUSPICIOUS LINKS DETECTED: Found ${riskyUrls.length} high-risk URL(s) containing IP routing, shorteners, or brand impersonation.`);
+    }
+
     // Threat Level Evaluation
     let threatLevel: 'CLEAN' | 'SUSPICIOUS' | 'HIGH_RISK' = 'CLEAN';
     if (
@@ -162,7 +173,8 @@ export const uploadEmail = async (req: Request, res: Response): Promise<void> =>
       riskyAtts.length > 0 || 
       ['FAIL', 'REJECT'].includes(dmarcResult) || 
       ['FAIL', 'HARDFAIL'].includes(spfResult) ||
-      (domainAnalysis && domainAnalysis.brandImpersonation.matchType !== null)
+      (domainAnalysis && domainAnalysis.brandImpersonation.matchType !== null) ||
+      riskyUrls.length > 0
     ) {
       threatLevel = 'HIGH_RISK';
     } else if (anomalies.length === 1) {
@@ -177,7 +189,8 @@ export const uploadEmail = async (req: Request, res: Response): Promise<void> =>
         threatLevel,
         anomalies,
         attachments,
-        domainAnalysis
+        domainAnalysis,
+        urlAnalysis
       }
     });
   } catch (error: any) {

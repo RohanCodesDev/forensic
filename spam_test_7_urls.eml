@@ -1,0 +1,29 @@
+From: "PayPal Support" <support@notifications.com>
+To: user@example.com
+Subject: Account Verification Required
+Date: Fri, 04 Sep 2026 15:00:00 +0000
+Content-Type: text/html; charset="utf-8"
+
+<html>
+<body>
+  <p>Dear Customer,</p>
+  <p>We need you to verify your identity to prevent account suspension.</p>
+  
+  <p>Please click here to login securely:</p>
+  <p><a href="http://192.168.1.1/login.php?session=xyz">Verify Now (IP Link)</a></p>
+  
+  <p>If that doesn't work, use our alternate secure link:</p>
+  <p><a href="http://bit.ly/paypal-secure-update">Alternate Link (Shortener + Brand)</a></p>
+
+  <p>Or click here to go directly to PayPal:</p>
+  <p><a href="http://evil-phishing-site.com/steal">https://paypal.com/login</a></p>
+
+  <p>You can also use our new international portal:</p>
+  <p><a href="https://xn--pple-43d.com">https://apple.com (Punycode Homograph)</a></p>
+
+  <p>Or visit the main site:</p>
+  <p><a href="https://paypal.com">https://paypal.com (Clean)</a></p>
+  
+  <p>Regards,<br>PayPal Security Team</p>
+</body>
+</html>

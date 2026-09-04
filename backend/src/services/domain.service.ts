@@ -1,6 +1,6 @@
 // backend/src/services/domain.service.ts
 
-const TARGET_BRANDS = [
+export const TARGET_BRANDS = [
   'paypal', 'apple', 'microsoft', 'google', 'amazon', 
   'netflix', 'chase', 'bankofamerica', 'wellsfargo', 'meta', 'facebook'
 ];

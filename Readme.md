@@ -52,6 +52,10 @@ Do NOT just generate the entire project at once. I want to **learn while buildin
 * **What We Built:** Created `domain.service.ts` to compute Levenshtein distances against major brand domains, detect keyword stacking (e.g., `apple-security-login.com`), and flag freemail impersonation (e.g., "Netflix Support" sending from `@gmail.com`). Added a **Domain Forensics & Impersonation** panel to the frontend.
 * **Why It Matters:** Attackers rely on human visual skimming. By replacing `l` with `1` (`paypa1.com`) or registering lookalike domains, they bypass purely technical checks like SPF (since they own the fake domain). The domain analysis engine catches these cognitive tricks algorithmically.
 
+### ✅ PHASE 6 — URL Extraction & Risk Analysis
+* **What We Built:** Created `url.service.ts` to extract embedded hyperlinks from plain text and HTML emails using RegEx. Analyzes domains for risk factors: raw IP routing, URL shorteners (like `bit.ly`), HTTP downgrades, suspicious path keywords, and brand impersonation in paths. Exposed the data visually in the frontend.
+* **Why It Matters:** Attackers often mask malicious destinations via URL shorteners or raw IPs to bypass automated spam filters. Highlighting these tactics instantly reveals the true, dangerous destination to the forensic analyst.
+
 ---
 
 # 1. Project Goal
