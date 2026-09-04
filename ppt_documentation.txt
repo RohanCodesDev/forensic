@@ -1,0 +1,301 @@
+================================================================================
+PROJECT PRESENTATION DOCUMENTATION (FOR PPT CREATION)
+TITLE: AI-Powered Email Threat Detection, Geolocation & Forensic Intelligence Platform
+================================================================================
+
+--------------------------------------------------------------------------------
+SLIDE 1: TITLE SLIDE
+--------------------------------------------------------------------------------
+• Title: AI-Powered Email Threat Detection, Geolocation & Forensic Intelligence Platform
+• Subtitle: End-to-End Email Security, Header Forensics, Geolocation Mapping & Threat Intelligence
+• Domain: Cybersecurity & Digital Forensics
+• Target Audience: Security Analysts, Incident Responders, Technical Leaders, Non-Technical Stakeholders
+
+--------------------------------------------------------------------------------
+SLIDE 2: PROBLEM STATEMENT & CORE OBJECTIVE
+--------------------------------------------------------------------------------
+• The Problem:
+  - Over 90% of cyberattacks start with a malicious or phishing email.
+  - Attackers easily fake sender names, hide malicious links behind shorteners, and spoof company brands.
+  - Security analysts waste hours manually reading messy email headers, tracing IP hops, and verifying DNS records.
+
+• Our Solution:
+  - An intelligent, automated web platform where users upload a raw `.eml` email file.
+  - The system dissects the email in seconds: headers, server relay hops, domains, links, geographical routes, and threat database hits.
+  - Combines deterministic forensic rules with threat intelligence feeds and AI classification.
+
+--------------------------------------------------------------------------------
+SLIDE 3: SYSTEM ARCHITECTURE & DATA FLOW
+--------------------------------------------------------------------------------
+• High-Level Architecture (3-Tier System):
+  1. Frontend (User Interface):
+     - Interactive dashboard built with Next.js & Tailwind CSS.
+     - Real-time forensic breakdown, security alert badges, and interactive route map.
+  2. Backend (API & Forensic Engines):
+     - Node.js & Express API written in TypeScript.
+     - Modular analysis engines for headers, domains, URLs, routes, geolocation, and threat feeds.
+  3. Database & Threat Intelligence:
+     - PostgreSQL database managed with Prisma ORM for storing emails and forensic logs.
+     - Live external Threat Intelligence APIs (e.g., AbuseIPDB, IP geolocation services).
+
+• Data Flow in Simple Words:
+  [User Uploads .eml] ➔ [Express API Parses Email] ➔ [Parallel Forensic Engines Analyze]
+  ➔ [Threat Feeds Check Reputation] ➔ [Save to PostgreSQL] ➔ [Render Live Dashboard & Interactive Map]
+
+================================================================================
+COMPLETE PHASE-BY-PHASE BREAKDOWN (PHASE 0 TO PHASE 18)
+================================================================================
+
+--------------------------------------------------------------------------------
+SLIDE 4: PHASE 0 — CYBERSECURITY & EMAIL FUNDAMENTALS
+--------------------------------------------------------------------------------
+• Status: Completed (Foundation Knowledge)
+• Plan / Objective:
+  - Understand how email travels across the internet (SMTP protocol, DNS records, headers, MIME format).
+• What Was Done:
+  - Defined key concepts: difference between visible display name and real sender address, how mail transfer agents (MTAs) stamp headers, and how authentication protocols protect users.
+• How It Is Done:
+  - Conceptual grounding to ensure forensic engines strictly distinguish between "Observed Evidence" (hard facts in headers) and "Inferences" (assumptions).
+
+--------------------------------------------------------------------------------
+SLIDE 5: PHASE 1 — FULL-STACK SYSTEM FOUNDATION
+--------------------------------------------------------------------------------
+• Status: Completed
+• Plan / Objective:
+  - Build a secure, scalable web foundation connecting the frontend, backend, and database.
+• What Was Done:
+  - Set up an Express.js backend with TypeScript for type safety.
+  - Set up a Next.js frontend with Tailwind CSS.
+  - Configured PostgreSQL database using Prisma ORM for structured, tamper-proof storage of forensic evidence.
+• Libraries & Tools Used:
+  - Backend: `express`, `typescript`, `prisma`, `@prisma/client`, `cors`, `dotenv`.
+  - Frontend: `next`, `react`, `tailwindcss`.
+• Why It Matters:
+  - Provides a clean, modular foundation capable of handling heavy forensic tasks and persistent case storage.
+
+--------------------------------------------------------------------------------
+SLIDE 6: PHASE 2 — EMAIL UPLOAD & MIME PARSING
+--------------------------------------------------------------------------------
+• Status: Completed
+• Plan / Objective:
+  - Allow users to drag and drop raw `.eml` files, extract all contents, and save structured metadata.
+• What Was Done:
+  - Implemented file upload with secure memory handling (5MB limit via `multer`).
+  - Extracted email body (plain text & HTML), subject, sender, recipients, timestamps, attachments, and full raw headers.
+• How It Is Done:
+  - Used `mailparser` (`simpleParser`) library in Node.js to deconstruct complex MIME text into structured JavaScript objects and store them in PostgreSQL.
+• Libraries Used:
+  - `mailparser`, `multer`.
+• Why It Matters:
+  - Raw emails are complex encoded text blocks. Parsing turns messy data into clean, queryable fields for inspection.
+
+--------------------------------------------------------------------------------
+SLIDE 7: PHASE 3 — EMAIL HEADER FORENSICS & ANOMALY DETECTION
+--------------------------------------------------------------------------------
+• Status: Completed
+• Plan / Objective:
+  - Detect common email header forgery techniques used by scammers.
+• What Was Done:
+  - Automated detection of:
+    1. Reply-To Mismatches (display says `company.com`, but replies go to `attacker@gmail.com`).
+    2. Return-Path Mismatches (bounced emails route to an unrelated address).
+    3. Missing Message-ID (spammers often forget to add legitimate mail server IDs).
+• How It Is Done:
+  - Regex pattern matching and domain comparison logic inside `analysis.service.ts`.
+• Why It Matters:
+  - Catches the vast majority of basic phishing campaigns where the attacker tries to intercept victim replies.
+
+--------------------------------------------------------------------------------
+SLIDE 8: PHASE 4 — SPF, DKIM & DMARC PROTOCOL AUDIT
+--------------------------------------------------------------------------------
+• Status: Completed
+• Plan / Objective:
+  - Verify standard email authentication protocols to check if the sender is genuine.
+• What Was Done:
+  - Extracted and audited `Authentication-Results` headers for:
+    - SPF (Sender Policy Framework): Checks if the sending server IP is authorized by the domain owner.
+    - DKIM (DomainKeys Identified Mail): Cryptographic digital signature confirming the email was not modified in transit.
+    - DMARC: Checks if the `From` domain matches SPF and DKIM pass status.
+  - Added color-coded status badges (PASS / FAIL / NONE) on the frontend dashboard.
+• How It Is Done:
+  - Regex extraction and validation logic in `analysis.service.ts` and Prisma schema storage.
+• Why It Matters:
+  - DMARC failures immediately flag domain spoofing and impersonation attacks.
+
+--------------------------------------------------------------------------------
+SLIDE 9: PHASE 5 — SENDER & BRAND IMPERSONATION ANALYSIS
+--------------------------------------------------------------------------------
+• Status: Completed
+• Plan / Objective:
+  - Catch visual deception tricks such as typosquatting and lookalike domains (e.g., `paypa1.com`).
+• What Was Done:
+  - Created `domain.service.ts` to detect:
+    - Lookalike domains using the Levenshtein Distance algorithm (e.g., swapping `l` with `1`, `o` with `0`).
+    - Suspicious keyword stacking (e.g., `apple-security-verify-login.com`).
+    - Freemail impersonation (e.g., Sender display name is "Microsoft Support", but email is `@gmail.com`).
+• How It Is Done:
+  - Custom Levenshtein distance string comparison and target brand keyword matching against a curated brand database.
+• Why It Matters:
+  - Attackers register fake lookalike domains that pass technical SPF checks; this engine spots the human deception trick.
+
+--------------------------------------------------------------------------------
+SLIDE 10: PHASE 6 — URL EXTRACTION & HYPERLINK RISK ENGINE
+--------------------------------------------------------------------------------
+• Status: Completed
+• Plan / Objective:
+  - Extract every embedded hyperlink from text and HTML body and assess safety.
+• What Was Done:
+  - Created `url.service.ts` to pull out all links and scan for red flags:
+    - Raw IP addresses used in URLs instead of domain names (e.g., `http://192.168.1.1/login`).
+    - Known URL shorteners used to conceal destination (e.g., `bit.ly`, `tinyurl.com`).
+    - Unencrypted HTTP links requesting login/banking credentials.
+    - Suspicious path keywords (e.g., `verify-account`, `update-billing`).
+• How It Is Done:
+  - Fast regular expressions and URL parser utilities in Node.js.
+• Why It Matters:
+  - Malicious links are the primary delivery vehicle for credential harvesting and malware.
+
+--------------------------------------------------------------------------------
+SLIDE 11: PHASE 7 — IP & SMTP ROUTE ANALYSIS (RECEIVED CHAIN)
+--------------------------------------------------------------------------------
+• Status: Completed
+• Plan / Objective:
+  - Reconstruct the step-by-step physical server route the email traveled across the internet.
+• What Was Done:
+  - Created `route.service.ts` to parse `Received:` headers from bottom-to-top (Originating server ➔ Intermediate relays ➔ Destination MX).
+  - Extracted relay IP addresses, hostnames, transfer protocols, and calculated delay latency between hops.
+  - Identified the true Public Originating IP address.
+• How It Is Done:
+  - Reverse chronological parsing of multi-line `Received` header blocks.
+• Why It Matters:
+  - Attackers can fake display names, but cannot rewrite intermediate server logs; this reveals the true physical origin server.
+
+--------------------------------------------------------------------------------
+SLIDE 12: PHASE 8 — IP GEOLOCATION & INTERACTIVE MAP VISUALIZATION
+--------------------------------------------------------------------------------
+• Status: Completed
+• Plan / Objective:
+  - Map the geographic journey of the email visually for analysts.
+• What Was Done:
+  - Built `geo.service.ts` to convert public IPs into geographic coordinates (Country, City, ISP, ASN, Latitude/Longitude) with offline caching.
+  - Created `GeoRouteMap.tsx`: An interactive dark-mode Leaflet map rendering hop markers, popups, and route lines spanning continents.
+• Libraries Used:
+  - `leaflet`, `@types/leaflet`, Next.js dynamic client-side rendering.
+• Why It Matters:
+  - Instantly exposes "impossible travel" or foreign server relays (e.g., internal company email originating from an offshore rogue server).
+
+--------------------------------------------------------------------------------
+SLIDE 13: PHASE 9 & INTERLUDE — CYBER THREAT INTELLIGENCE (CTI) & LIVE APIS
+--------------------------------------------------------------------------------
+• Status: Completed
+• Plan / Objective:
+  - Cross-reference discovered IPs, domains, and URLs against global threat databases in real time.
+• What Was Done:
+  - Integrated live **AbuseIPDB API** via secure environment variables to retrieve live abuse confidence scores and threat categories.
+  - Refactored backend into a master orchestrator (`analysis.service.ts`) following Single Responsibility Principle.
+  - Added strict upload protection (5MB limits) to prevent server overload.
+• Libraries Used:
+  - `threat.service.ts`, native `fetch` / REST API integration.
+• Why It Matters:
+  - Raw IPs are meaningless without context; Threat Intelligence immediately flags known hacker infrastructure and Tor exit nodes.
+
+================================================================================
+UPCOMING & ROADMAP PHASES (PHASE 10 TO PHASE 18)
+================================================================================
+
+--------------------------------------------------------------------------------
+SLIDE 14: PHASE 10 — RULE-BASED SCORING & COMPREHENSIVE RISK ENGINE
+--------------------------------------------------------------------------------
+• Status: Roadmap / Next Step
+• Plan / Objective:
+  - Calculate an overall transparent Threat Score (0–100) with clear explanations.
+• What Will Be Done:
+  - Aggregate evidence from all previous modules into weighted risk scores:
+    - DMARC Failure: +20 pts
+    - Reply-To Mismatch: +15 pts
+    - Lookalike / Phishing Domain: +25 pts
+    - Threat Intel Abuse Hit: +30 pts
+    - Urgent Financial Language: +10 pts
+  - Grade the email: Low (0-24), Medium (25-49), High (50-74), Critical (75-100).
+• How It Will Be Done:
+  - Deterministic weighting algorithm inside a new `risk.service.ts` with human-readable reasoning output.
+
+--------------------------------------------------------------------------------
+SLIDE 15: PHASE 11 & 12 — NLP & AI-POWERED THREAT CLASSIFICATION
+--------------------------------------------------------------------------------
+• Status: Roadmap
+• Plan / Objective:
+  - Use Machine Learning and Natural Language Processing to detect social engineering and psychological manipulation.
+• What Will Be Done:
+  - Phase 11: Keyword and heuristic detection for urgency, fake invoices, credential resets, and CEO fraud (Business Email Compromise - BEC).
+  - Phase 12: Dedicated Python ML Microservice (FastAPI / Flask) using scikit-learn / Hugging Face Transformers to classify emails (Benign, Phishing, BEC, Spam, Malware).
+• Architecture & Libraries:
+  - Express.js backend calls Python ML service via REST API.
+  - Libraries: Python, `scikit-learn`, `transformers`, `fastapi`.
+
+--------------------------------------------------------------------------------
+SLIDE 16: PHASE 13 & 14 — INFRASTRUCTURE GRAPH & CAMPAIGN CORRELATION
+--------------------------------------------------------------------------------
+• Status: Roadmap
+• Plan / Objective:
+  - Visualize relationships between attack assets and detect multi-email attack campaigns.
+• What Will Be Done:
+  - Phase 13: Interactive visual graph linking Senders ➔ Domains ➔ IPs ➔ ASNs ➔ URLs using `reactflow`.
+  - Phase 14: Campaign correlation engine comparing multiple suspicious emails to find common threat actors sharing infrastructure.
+• Libraries & Tools:
+  - `reactflow` (React Flow graph visualizer), PostgreSQL aggregation queries.
+
+--------------------------------------------------------------------------------
+SLIDE 17: PHASE 15 & 16 — INVESTIGATION CASE MANAGEMENT & EVIDENCE INTEGRITY
+--------------------------------------------------------------------------------
+• Status: Roadmap
+• Plan / Objective:
+  - Turn the tool into an enterprise-grade Digital Forensics Incident Response (DFIR) case system.
+• What Will Be Done:
+  - Phase 15: Case management dashboard (Case IDs, analyst notes, severity tagging, evidence attachment).
+  - Phase 16: Cryptographic evidence integrity (SHA-256 file hashing, tamper logs, strict chain of custody, privacy masking).
+• Value:
+  - Ensures forensic evidence collected is legally defensible and adheres to chain-of-custody standards.
+
+--------------------------------------------------------------------------------
+SLIDE 18: PHASE 17 & 18 — FORENSIC REPORT GENERATION & EXECUTIVE DASHBOARD
+--------------------------------------------------------------------------------
+• Status: Roadmap
+• Plan / Objective:
+  - Deliver automated, professional PDF forensic reports and a complete executive command center.
+• What Will Be Done:
+  - Phase 17: One-click exportable PDF investigation reports summarizing technical evidence, map routes, and risk score breakdown.
+  - Phase 18: Unified enterprise dashboard with analytics, recent threats, and team audit logs.
+• Libraries & Tools:
+  - `pdfmake` / `jspdf` for PDF generation, `recharts` for visual analytics charts.
+
+================================================================================
+SLIDE 19: TECHNOLOGY STACK SUMMARY
+================================================================================
+• Frontend:
+  - Framework: Next.js (React 19)
+  - Styling: Tailwind CSS
+  - Mapping: Leaflet (`leaflet`, `@types/leaflet`)
+  - Visual Graphs (Roadmap): React Flow (`reactflow`), Recharts
+• Backend:
+  - Runtime: Node.js with TypeScript
+  - Web Framework: Express.js (v5)
+  - ORM & Database: Prisma ORM with PostgreSQL
+  - MIME Parser: `mailparser` (`simpleParser`)
+  - File Uploads: `multer` (with strict memory limits)
+• Threat Intelligence & External APIs:
+  - Live Threat Feed: AbuseIPDB API
+  - IP Geolocation: IP Geolocation API / Local cache
+• Machine Learning Microservice (Roadmap):
+  - Python (FastAPI / Flask)
+  - NLP / ML: `scikit-learn`, `transformers` (Hugging Face)
+
+================================================================================
+SLIDE 20: SUMMARY & IMPACT
+================================================================================
+• Key Strengths:
+  1. Complete Visibility: Dissects headers, authentication (SPF/DKIM/DMARC), links, domains, and server routes.
+  2. Visual Forensics: Real-time map displaying the physical path of an email across continents.
+  3. Actionable Intelligence: Instant detection of brand impersonation, typosquatting, and live malicious IP reputations.
+  4. Progressive & Robust Architecture: Built step-by-step with clean separation between evidence, analysis, and AI predictions.
+================================================================================

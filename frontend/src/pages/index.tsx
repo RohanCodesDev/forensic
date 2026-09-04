@@ -69,7 +69,7 @@ export default function Home() {
               Forensic_Mail <span className="text-gray-600 font-light">||</span> SYSTEM.CORE
             </h1>
             <p className="text-gray-500 text-[10px] md:text-sm tracking-widest uppercase ml-0 md:ml-6 mt-2 md:mt-0">
-              [PHASE_8] :: IP_GEOLOCATION_AND_MAP_VISUALIZATION
+              [PHASE_10] :: MULTI_FACTOR_RISK_ENGINE_AND_SCORING
             </p>
           </div>
         </header>
@@ -107,26 +107,96 @@ export default function Home() {
 
         {result && (
           <section className="bg-[#0a0a0a] p-4 md:p-8 border border-gray-800 rounded-xl shadow-2xl animate-fade-in space-y-6">
-            {/* THREAT SEVERITY BANNER */}
-            <div className={`p-4 rounded-lg border flex flex-col md:flex-row items-start md:items-center justify-between gap-3 font-mono ${
-              result.analysis?.threatLevel === "HIGH_RISK" 
-                ? "bg-rose-950/40 border-rose-600/80 text-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.2)]"
-                : result.analysis?.threatLevel === "SUSPICIOUS"
-                ? "bg-amber-950/40 border-amber-600/80 text-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.2)]"
-                : "bg-emerald-950/40 border-emerald-600/80 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.2)]"
-            }`}>
-              <div className="flex items-center gap-3">
-                <span className={`w-3 h-3 rounded-full animate-ping ${
-                  result.analysis?.threatLevel === "HIGH_RISK" ? "bg-rose-500" : result.analysis?.threatLevel === "SUSPICIOUS" ? "bg-amber-500" : "bg-emerald-500"
-                }`}></span>
-                <span className="font-bold text-sm tracking-wider uppercase">
-                  FORENSIC THREAT EVALUATION: {result.analysis?.threatLevel || "EVALUATING"}
-                </span>
+            {/* PHASE 10: MULTI-FACTOR RISK ENGINE & SCORING METER */}
+            {result.analysis?.riskEvaluation && (
+              <div className="bg-black border border-gray-800 rounded-xl p-6 shadow-2xl space-y-4">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-gray-800/80 pb-4">
+                  <div className="flex items-center gap-4">
+                    <div className={`relative flex items-center justify-center w-16 h-16 rounded-full border-2 font-mono font-bold text-xl ${
+                      result.analysis.riskEvaluation.severity === "CRITICAL"
+                        ? "border-rose-500 text-rose-400 bg-rose-950/30 shadow-[0_0_15px_rgba(244,63,94,0.4)]"
+                        : result.analysis.riskEvaluation.severity === "HIGH"
+                        ? "border-orange-500 text-orange-400 bg-orange-950/30 shadow-[0_0_15px_rgba(249,115,22,0.4)]"
+                        : result.analysis.riskEvaluation.severity === "MEDIUM"
+                        ? "border-amber-500 text-amber-400 bg-amber-950/30 shadow-[0_0_15px_rgba(245,158,11,0.4)]"
+                        : "border-emerald-500 text-emerald-400 bg-emerald-950/30 shadow-[0_0_15px_rgba(16,185,129,0.4)]"
+                    }`}>
+                      {result.analysis.riskEvaluation.score}
+                      <span className="text-[9px] font-normal text-gray-500 absolute -bottom-2 bg-black px-1 rounded">/100</span>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs uppercase tracking-widest text-gray-400 font-semibold font-mono">[PHASE 10] RISK SCORE ENGINE</span>
+                        <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border uppercase ${
+                          result.analysis.riskEvaluation.severity === "CRITICAL"
+                            ? "bg-rose-950/80 border-rose-600 text-rose-300"
+                            : result.analysis.riskEvaluation.severity === "HIGH"
+                            ? "bg-orange-950/80 border-orange-600 text-orange-300"
+                            : result.analysis.riskEvaluation.severity === "MEDIUM"
+                            ? "bg-amber-950/80 border-amber-600 text-amber-300"
+                            : "bg-emerald-950/80 border-emerald-600 text-emerald-300"
+                        }`}>
+                          {result.analysis.riskEvaluation.severity} SEVERITY
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-300 font-mono mt-1">
+                        {result.analysis.riskEvaluation.summary}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="w-full md:w-48 bg-zinc-900 rounded-full h-3 border border-gray-800 overflow-hidden self-center">
+                    <div
+                      className={`h-full transition-all duration-1000 ${
+                        result.analysis.riskEvaluation.severity === "CRITICAL"
+                          ? "bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.8)]"
+                          : result.analysis.riskEvaluation.severity === "HIGH"
+                          ? "bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.8)]"
+                          : result.analysis.riskEvaluation.severity === "MEDIUM"
+                          ? "bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.8)]"
+                          : "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]"
+                      }`}
+                      style={{ width: `${result.analysis.riskEvaluation.score}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* ITEMISED CONTRIBUTING RISK FACTORS */}
+                {result.analysis.riskEvaluation.factors?.length > 0 ? (
+                  <div className="space-y-2 pt-2">
+                    <span className="text-[11px] font-mono text-gray-500 uppercase tracking-wider block">
+                      Contributing Risk Factors ({result.analysis.riskEvaluation.factors.length}):
+                    </span>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {result.analysis.riskEvaluation.factors.map((f: any, idx: number) => (
+                        <div key={idx} className="bg-[#050505] border border-gray-800 p-3 rounded-lg flex items-start justify-between gap-3">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-mono font-bold text-gray-200">{f.name}</span>
+                              <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded border uppercase ${
+                                f.severity === "CRITICAL" ? "border-rose-800 text-rose-400 bg-rose-950/40" :
+                                f.severity === "HIGH" ? "border-orange-800 text-orange-400 bg-orange-950/40" :
+                                "border-amber-800 text-amber-400 bg-amber-950/40"
+                              }`}>
+                                {f.severity}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-gray-400 leading-snug">{f.description}</p>
+                          </div>
+                          <span className="font-mono text-xs font-bold px-2 py-1 bg-zinc-900 border border-zinc-700 text-rose-400 rounded shrink-0">
+                            +{f.points}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-3 bg-[#050505] border border-gray-800 rounded text-xs text-emerald-400 font-mono">
+                    ✓ Clean Audit: Zero malicious factors detected across headers, authentication, links, and threat feeds.
+                  </div>
+                )}
               </div>
-              <span className="text-[10px] md:text-xs uppercase opacity-80 border px-2 py-0.5 rounded border-current font-semibold self-start md:self-auto">
-                {result.analysis?.anomalies?.length || 0} ANOMALIES DETECTED
-              </span>
-            </div>
+            )}
 
             <h2 className="text-lg font-medium mb-2 text-white flex items-center gap-2">
               <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>

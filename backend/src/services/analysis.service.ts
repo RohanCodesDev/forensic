@@ -2,11 +2,12 @@ import { analyzeSenderDomain } from './domain.service';
 import { analyzeUrls } from './url.service';
 import { analyzeSmtpRoute } from './route.service';
 import { analyzeThreats } from './threat.service';
+import { calculateRiskScore } from './risk.service';
 
 /**
  * Master Orchestrator for all Forensic Analysis Services
  * It takes parsed email data and routes it through all specialized engines (Domain, URL, Route, CTI),
- * compiles the results, and calculates the final Threat Level score.
+ * compiles the results, and calculates the final Multi-Factor Risk Score and Threat Level.
  */
 export const runFullAnalysis = async (emailData: any, parsed: any, attachments: any[]) => {
   const anomalies: string[] = [];
@@ -97,24 +98,22 @@ export const runFullAnalysis = async (emailData: any, parsed: any, attachments: 
     anomalies.push(`THREAT INTEL ALERT: Found ${maliciousThreats.length} indicator(s) of compromise (IOCs) across IPs/Domains/URLs.`);
   }
 
-  // Threat Level Evaluation
-  let threatLevel: 'CLEAN' | 'SUSPICIOUS' | 'HIGH_RISK' = 'CLEAN';
-  if (
-    anomalies.length >= 2 || 
-    riskyAtts.length > 0 || 
-    ['FAIL', 'REJECT'].includes(emailData.dmarcResult) || 
-    ['FAIL', 'HARDFAIL'].includes(emailData.spfResult) ||
-    (domainAnalysis && domainAnalysis.brandImpersonation.matchType !== null) ||
-    riskyUrls.length > 0 ||
-    routeAnalysis.anomalies.length > 0
-  ) {
-    threatLevel = 'HIGH_RISK';
-  } else if (anomalies.length === 1) {
-    threatLevel = 'SUSPICIOUS';
-  }
+  // PHASE 10: Multi-Factor Rule-Based Risk Engine Evaluation
+  const riskEvaluation = calculateRiskScore(
+    emailData,
+    domainAnalysis,
+    urlAnalysis,
+    routeAnalysis,
+    threatIntel,
+    attachments
+  );
+
+  // Maintain backward compatibility for threatLevel string
+  const threatLevel = riskEvaluation.severity === 'LOW' ? 'CLEAN' : riskEvaluation.severity === 'MEDIUM' ? 'SUSPICIOUS' : 'HIGH_RISK';
 
   return {
     threatLevel,
+    riskEvaluation,
     anomalies,
     attachments,
     domainAnalysis,
