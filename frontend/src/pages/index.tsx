@@ -56,31 +56,31 @@ export default function Home() {
   };
 
   return (
-    <div className={`min-h-screen bg-black text-gray-300 p-8 ${lexend.className} selection:bg-green-500 selection:text-black`}>
+    <div className={`min-h-screen bg-black text-gray-300 p-4 sm:p-6 md:p-8 ${lexend.className} selection:bg-green-500 selection:text-black`}>
       <Head>
         <title>Forensic Mail | Dashboard</title>
       </Head>
 
-      <main className="max-w-5xl mx-auto space-y-10 pt-10">
-        <header className="border-b border-gray-800 pb-6 mb-8 flex items-center justify-between">
+      <main className="max-w-5xl mx-auto space-y-6 md:space-y-10 pt-4 md:pt-10">
+        <header className="border-b border-gray-800 pb-4 md:pb-6 mb-6 md:mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-semibold tracking-wide text-white mb-1 flex items-center gap-3">
-              <span className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]"></span>
+            <h1 className="text-xl md:text-3xl font-semibold tracking-wide text-white mb-1 flex items-center gap-3">
+              <span className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]"></span>
               Forensic_Mail <span className="text-gray-600 font-light">||</span> SYSTEM.CORE
             </h1>
-            <p className="text-gray-500 text-sm tracking-widest uppercase ml-6">
+            <p className="text-gray-500 text-[10px] md:text-sm tracking-widest uppercase ml-0 md:ml-6 mt-2 md:mt-0">
               [PHASE_8] :: IP_GEOLOCATION_AND_MAP_VISUALIZATION
             </p>
           </div>
         </header>
 
-        <section className="bg-[#0a0a0a] p-8 border border-gray-800 rounded-xl shadow-2xl relative overflow-hidden">
-          <h2 className="text-lg font-medium mb-6 text-white flex items-center gap-2">
+        <section className="bg-[#0a0a0a] p-4 md:p-8 border border-gray-800 rounded-xl shadow-2xl relative overflow-hidden">
+          <h2 className="text-lg font-medium mb-4 md:mb-6 text-white flex items-center gap-2">
             <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
             Ingest Evidence
           </h2>
           
-          <div className="flex flex-col items-start justify-center p-8 border border-dashed border-gray-700 bg-black rounded-lg hover:border-green-500/50 transition-colors">
+          <div className="flex flex-col items-start justify-center p-4 md:p-8 border border-dashed border-gray-700 bg-black rounded-lg hover:border-green-500/50 transition-colors">
             <input 
               type="file" 
               accept=".eml"
@@ -106,9 +106,9 @@ export default function Home() {
         </section>
 
         {result && (
-          <section className="bg-[#0a0a0a] p-8 border border-gray-800 rounded-xl shadow-2xl animate-fade-in space-y-6">
+          <section className="bg-[#0a0a0a] p-4 md:p-8 border border-gray-800 rounded-xl shadow-2xl animate-fade-in space-y-6">
             {/* THREAT SEVERITY BANNER */}
-            <div className={`p-4 rounded-lg border flex items-center justify-between font-mono ${
+            <div className={`p-4 rounded-lg border flex flex-col md:flex-row items-start md:items-center justify-between gap-3 font-mono ${
               result.analysis?.threatLevel === "HIGH_RISK" 
                 ? "bg-rose-950/40 border-rose-600/80 text-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.2)]"
                 : result.analysis?.threatLevel === "SUSPICIOUS"
@@ -123,7 +123,7 @@ export default function Home() {
                   FORENSIC THREAT EVALUATION: {result.analysis?.threatLevel || "EVALUATING"}
                 </span>
               </div>
-              <span className="text-xs uppercase opacity-80 border px-2 py-0.5 rounded border-current font-semibold">
+              <span className="text-[10px] md:text-xs uppercase opacity-80 border px-2 py-0.5 rounded border-current font-semibold self-start md:self-auto">
                 {result.analysis?.anomalies?.length || 0} ANOMALIES DETECTED
               </span>
             </div>
@@ -167,12 +167,12 @@ export default function Home() {
                 </span>
                 <div className="space-y-2">
                   {result.analysis.attachments.map((att: any, idx: number) => (
-                    <div key={idx} className={`p-3 rounded border flex items-center justify-between font-mono text-xs ${
+                    <div key={idx} className={`p-3 rounded border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 font-mono text-xs ${
                       att.isRisky ? "bg-rose-950/30 border-rose-800 text-rose-300" : "bg-[#050505] border-gray-800 text-gray-300"
                     }`}>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-gray-500">📄</span>
-                        <span className="font-semibold">{att.filename}</span>
+                        <span className="font-semibold break-all">{att.filename}</span>
                         <span className="text-gray-600">({(att.size / 1024).toFixed(1)} KB)</span>
                       </div>
                       {att.isRisky ? (
@@ -355,7 +355,7 @@ export default function Home() {
 
             {/* PHASE 9: Threat Intelligence (CTI) */}
             {result.analysis && result.analysis.threatIntel && result.analysis.threatIntel.length > 0 && (
-              <div className="bg-[#050505] border border-gray-800 p-6 rounded-lg space-y-4">
+              <div className="bg-[#050505] border border-gray-800 p-4 md:p-6 rounded-lg space-y-4">
                 <div className="border-b border-gray-800 pb-3 mb-4">
                   <h3 className="text-white font-semibold flex items-center gap-2">
                     <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
@@ -399,16 +399,16 @@ export default function Home() {
 
             {/* PHASE 7 & 8: SMTP Route & Interactive Geolocation Map */}
             {result.analysis && result.analysis.routeAnalysis && (
-              <div className="bg-[#0a0a0a] border border-gray-800 p-6 rounded-lg space-y-6">
-                <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-gray-800 pb-4 gap-2">
+              <div className="bg-[#0a0a0a] border border-gray-800 p-4 md:p-6 rounded-lg space-y-6">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between border-b border-gray-800 pb-4 gap-4">
                   <div>
-                    <h3 className="text-white font-semibold flex items-center gap-2">
-                      <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                    <h3 className="text-white font-semibold flex items-center gap-2 text-sm md:text-base">
+                      <svg className="w-4 h-4 md:w-5 md:h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                       SMTP Relay Hop Chain & Global Route Map
                     </h3>
-                    <p className="text-xs text-gray-500 font-mono mt-1">Chronological MTA relay hops & geographic infrastructure map</p>
+                    <p className="text-[10px] md:text-xs text-gray-500 font-mono mt-1">Chronological MTA relay hops & geographic infrastructure map</p>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-2 md:gap-3">
                     <div className="bg-blue-950/40 border border-blue-800/60 px-3 py-1.5 rounded-md text-xs font-mono">
                       <span className="text-gray-400">Total Hops: </span>
                       <span className="text-blue-400 font-bold">{result.analysis.routeAnalysis.totalHops}</span>

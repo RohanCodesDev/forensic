@@ -186,7 +186,7 @@ export default function GeoRouteMap({ hops }: GeoRouteMapProps) {
       />
       <div
         ref={mapContainerRef}
-        className="w-full h-[380px] rounded-lg border border-gray-800 shadow-2xl relative z-10 overflow-hidden"
+        className="w-full h-[250px] sm:h-[300px] md:h-[380px] rounded-lg border border-gray-800 shadow-2xl relative z-10 overflow-hidden"
       />
       <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-gray-400 px-1">
         <div className="flex items-center gap-4">
