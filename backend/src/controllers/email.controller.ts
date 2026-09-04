@@ -22,7 +22,7 @@ export const uploadEmail = async (req: Request, res: Response): Promise<void> =>
 
     // Extract Authentication-Results header (with fallback to Received-SPF and DKIM-Signature)
     const authHeaderRaw = parsed.headers.get('authentication-results');
-    const authHeaderStr = Array.isArray(authHeaderRaw) ? authHeaderRaw.join(' ') : (authHeaderRaw || '');
+    const authHeaderStr = Array.isArray(authHeaderRaw) ? authHeaderRaw.join(' ') : String(authHeaderRaw || '');
 
     const parseAuthStatus = (protocol: string) => {
       const match = authHeaderStr.match(new RegExp(`${protocol}=([a-zA-Z0-9_-]+)`, 'i'));
@@ -72,18 +72,18 @@ export const uploadEmail = async (req: Request, res: Response): Promise<void> =>
 
     const emailData = {
       filename: req.file.originalname,
-      from: parsed.from?.text || '',
-      to: parsed.to?.text || '',
-      cc: parsed.cc?.text || '',
+      from: (parsed.from as any)?.text || '',
+      to: (parsed.to as any)?.text || '',
+      cc: (parsed.cc as any)?.text || '',
       subject: parsed.subject || '',
       date: parsed.date ? parsed.date.toISOString() : '',
       messageId: parsed.messageId || '',
-      replyTo: parsed.replyTo?.text || '',
+      replyTo: (parsed.replyTo as any)?.text || '',
       returnPath: (parsed.headers.get('return-path') as any)?.text || (typeof parsed.headers.get('return-path') === 'string' ? parsed.headers.get('return-path') : ''),
       textBodySnippet: parsed.text ? parsed.text.substring(0, 500) + '...' : 'No text body',
       htmlBodyExists: !!parsed.html,
       attachmentCount: attachments.length,
-      receivedHeaders: receivedHeaders,
+      receivedHeaders: receivedHeaders as any,
       spfResult,
       dkimResult,
       dmarcResult
