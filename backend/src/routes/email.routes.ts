@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { uploadEmail } from '../controllers/email.controller';
+import { uploadEmail, getAllEmails, getEmailById, deleteEmail } from '../controllers/email.controller';
 
 const router = Router();
 
@@ -13,5 +13,8 @@ const upload = multer({
 });
 
 router.post('/upload', upload.single('file'), uploadEmail);
+router.get('/', getAllEmails);
+router.get('/:id', getEmailById);
+router.delete('/:id', deleteEmail);
 
 export default router;

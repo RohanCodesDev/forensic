@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { simpleParser } from 'mailparser';
 import { PrismaClient } from '@prisma/client';
+import crypto from 'crypto';
 import { runFullAnalysis } from '../services/analysis.service';
 
 const prisma = new PrismaClient();
@@ -16,6 +17,9 @@ export const uploadEmail = async (req: Request, res: Response): Promise<void> =>
       res.status(400).json({ status: 'error', message: 'Only .eml files are supported' });
       return;
     }
+
+    // Cryptographic SHA-256 hash of the evidence file buffer for non-repudiation
+    const sha256Hash = crypto.createHash('sha256').update(req.file.buffer).digest('hex');
 
     // Parse the raw email buffer
     const parsed = await simpleParser(req.file.buffer);
@@ -56,11 +60,16 @@ export const uploadEmail = async (req: Request, res: Response): Promise<void> =>
       const filename = att.filename || 'unnamed_attachment';
       const ext = filename.substring(filename.lastIndexOf('.')).toLowerCase();
       const isRisky = riskyExtensions.includes(ext);
+      
+      // Calculate attachment SHA-256 if content buffer is present
+      const attHash = att.content ? crypto.createHash('sha256').update(att.content).digest('hex') : null;
+
       return {
         filename,
         contentType: att.contentType,
         size: att.size,
-        isRisky
+        isRisky,
+        sha256: attHash
       };
     });
 
@@ -72,6 +81,7 @@ export const uploadEmail = async (req: Request, res: Response): Promise<void> =>
 
     const emailData = {
       filename: req.file.originalname,
+      sha256Hash,
       from: (parsed.from as any)?.text || '',
       to: (parsed.to as any)?.text || '',
       cc: (parsed.cc as any)?.text || '',
@@ -89,22 +99,130 @@ export const uploadEmail = async (req: Request, res: Response): Promise<void> =>
       dmarcResult
     };
 
-    // Save evidence immutably to PostgreSQL
-    const savedEmail = await prisma.email.create({
-      data: emailData
-    });
-
     // Delegate to the Master Orchestrator Service
     const analysisResult = await runFullAnalysis(emailData, parsed, attachments);
 
+    // Save evidence immutably to PostgreSQL along with complete analysis report
+    const savedEmail = await prisma.email.create({
+      data: {
+        ...emailData,
+        analysisReport: {
+          create: {
+            threatLevel: analysisResult.threatLevel,
+            riskScore: analysisResult.riskEvaluation?.score || 0,
+            severity: analysisResult.riskEvaluation?.severity || 'LOW',
+            summary: analysisResult.riskEvaluation?.summary || '',
+            anomalies: analysisResult.anomalies as any,
+            riskFactors: (analysisResult.riskEvaluation?.factors || []) as any,
+            domainAnalysis: (analysisResult.domainAnalysis || {}) as any,
+            urlAnalysis: (analysisResult.urlAnalysis || []) as any,
+            routeAnalysis: (analysisResult.routeAnalysis || {}) as any,
+            threatIntel: (analysisResult.threatIntel || []) as any,
+            attachments: (attachments || []) as any,
+          }
+        }
+      },
+      include: {
+        analysisReport: true
+      }
+    });
+
     res.json({
       status: 'success',
-      message: 'Evidence securely preserved in PostgreSQL.',
+      message: 'Evidence and full forensic report securely preserved in PostgreSQL.',
       data: savedEmail,
       analysis: analysisResult
     });
   } catch (error: any) {
     console.error('Email parsing error details:', error);
     res.status(500).json({ status: 'error', message: 'Failed to parse email: ' + (error.message || 'Unknown error') });
+  }
+};
+
+export const getAllEmails = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const emails = await prisma.email.findMany({
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        filename: true,
+        sha256Hash: true,
+        from: true,
+        to: true,
+        subject: true,
+        date: true,
+        createdAt: true,
+        spfResult: true,
+        dkimResult: true,
+        dmarcResult: true,
+        attachmentCount: true,
+        analysisReport: {
+          select: {
+            threatLevel: true,
+            riskScore: true,
+            severity: true,
+            summary: true,
+          }
+        }
+      }
+    });
+    res.json({ status: 'success', data: emails });
+  } catch (error: any) {
+    console.error('Error fetching email investigations:', error);
+    res.status(500).json({ status: 'error', message: 'Failed to fetch investigation history: ' + error.message });
+  }
+};
+
+export const getEmailById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = String(req.params.id);
+    const email: any = await prisma.email.findUnique({
+      where: { id },
+      include: {
+        analysisReport: true
+      }
+    });
+
+    if (!email) {
+      res.status(404).json({ status: 'error', message: 'Investigation record not found' });
+      return;
+    }
+
+    const report = email.analysisReport;
+    const analysis = report ? {
+      threatLevel: report.threatLevel,
+      riskEvaluation: {
+        score: report.riskScore,
+        severity: report.severity,
+        summary: report.summary,
+        factors: report.riskFactors || [],
+      },
+      anomalies: report.anomalies || [],
+      attachments: report.attachments || [],
+      domainAnalysis: report.domainAnalysis,
+      urlAnalysis: report.urlAnalysis || [],
+      routeAnalysis: report.routeAnalysis,
+      threatIntel: report.threatIntel || []
+    } : null;
+
+    res.json({
+      status: 'success',
+      data: email,
+      analysis
+    });
+  } catch (error: any) {
+    console.error('Error fetching email record:', error);
+    res.status(500).json({ status: 'error', message: 'Failed to fetch investigation: ' + error.message });
+  }
+};
+
+export const deleteEmail = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = String(req.params.id);
+    await prisma.email.delete({ where: { id } });
+    res.json({ status: 'success', message: 'Investigation deleted successfully' });
+  } catch (error: any) {
+    console.error('Error deleting email record:', error);
+    res.status(500).json({ status: 'error', message: 'Failed to delete investigation: ' + error.message });
   }
 };

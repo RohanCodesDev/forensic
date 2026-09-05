@@ -8,8 +8,9 @@ datasource db {
 }
 
 model Email {
-  id              String   @id @default(uuid())
+  id              String          @id @default(uuid())
   filename        String
+  sha256Hash      String?         // Cryptographic SHA-256 fingerprint of evidence buffer
   from            String
   to              String
   cc              String?
@@ -19,11 +20,31 @@ model Email {
   replyTo         String?
   returnPath      String?
   textBodySnippet String?
-  htmlBodyExists  Boolean  @default(false)
-  attachmentCount Int      @default(0)
-  receivedHeaders Json?    // Stores the array of hop infrastructure
-  spfResult       String?  @default("UNKNOWN")
-  dkimResult      String?  @default("UNKNOWN")
-  dmarcResult     String?  @default("UNKNOWN")
+  htmlBodyExists  Boolean         @default(false)
+  attachmentCount Int             @default(0)
+  receivedHeaders Json?           // Stores the array of hop infrastructure
+  spfResult       String?         @default("UNKNOWN")
+  dkimResult      String?         @default("UNKNOWN")
+  dmarcResult     String?         @default("UNKNOWN")
+  createdAt       DateTime        @default(now())
+  analysisReport  AnalysisReport?
+}
+
+model AnalysisReport {
+  id              String   @id @default(uuid())
+  emailId         String   @unique
+  email           Email    @relation(fields: [emailId], references: [id], onDelete: Cascade)
+  threatLevel     String   @default("UNKNOWN")
+  riskScore       Int      @default(0)
+  severity        String   @default("LOW")
+  summary         String?
+  anomalies       Json?    // Array of anomaly strings
+  riskFactors     Json?    // Array of factor objects with points
+  domainAnalysis  Json?    // Domain & typosquatting results
+  urlAnalysis     Json?    // Embedded URLs and risk flags
+  routeAnalysis   Json?    // Hop chain, delays, originating IP, geo
+  threatIntel     Json?    // IOC hits across AbuseIPDB, URLhaus, etc.
+  attachments     Json?    // Attachment metadata and risk flags
   createdAt       DateTime @default(now())
 }
+
