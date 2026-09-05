@@ -77,6 +77,18 @@ export interface AttachmentPayload {
   size: number;
   isRisky: boolean;
   sha256?: string | null;
+  // Phase 14: Malware scan results (populated by attachment.service.ts)
+  isKnownMalware?: boolean;
+  knownMalwareName?: string;
+  vtDetections?: number;
+  vtTotalEngines?: number;
+  vtLink?: string;
+  mimeTypeMismatch?: boolean;
+  mimeTypeWarning?: string;
+  highRiskMime?: boolean;
+  threatScore?: number;
+  verdict?: 'CLEAN' | 'SUSPICIOUS' | 'MALICIOUS';
+  verdictReasons?: string[];
 }
 
 export interface NlpTrigger {

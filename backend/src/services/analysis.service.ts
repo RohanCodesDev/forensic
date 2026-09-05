@@ -5,6 +5,7 @@ import { analyzeThreats } from './threat.service';
 import { calculateRiskScore } from './risk.service';
 import { analyzeNlp } from './nlp.service';
 import { analyzeWithAI } from './ai.service';
+import { scanAllAttachments } from './attachment.service';
 
 /**
  * Master Orchestrator for all Forensic Analysis Services
@@ -144,11 +145,27 @@ export const runFullAnalysis = async (emailData: any, parsed: any, attachments: 
   } catch (error: any) {
     console.error('[AI Analysis Error] Failed to reach Groq API:', error.message);
   }
+  // Phase 14: Attachment Malware Hash Analysis
+  let malwareScanResults = [];
+  try {
+    if (attachments && attachments.length > 0) {
+      malwareScanResults = await scanAllAttachments(attachments) as any[];
+    }
+  } catch (error: any) {
+    console.error('[Attachment Scan Error] Failed to scan attachments:', error.message);
+  }
+
+  // Merge malware scan results back into attachments
+  const scannedAttachments = attachments.map((att: any, idx: number) => ({
+    ...att,
+    ...(malwareScanResults[idx] || {})
+  }));
+
   return {
     threatLevel,
     riskEvaluation,
     anomalies,
-    attachments,
+    attachments: scannedAttachments,
     domainAnalysis,
     urlAnalysis,
     routeAnalysis,

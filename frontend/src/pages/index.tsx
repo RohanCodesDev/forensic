@@ -181,6 +181,7 @@ export default function Home() {
                 { id: "section-ai", label: "AI Analyst" },
                 { id: "section-nlp", label: "NLP Heuristics" },
                 { id: "section-payload", label: "Message Payload" },
+                { id: "section-attachments", label: "Attachments" },
                 { id: "section-auth", label: "Authentication" },
                 { id: "section-domain", label: "Domain Forensics" },
                 { id: "section-graph", label: "Threat Graph" },
@@ -242,9 +243,9 @@ export default function Home() {
               <ExtractedPayloadCard evidence={result} />
             </div>
 
-            {/* Attachments Breakdown */}
-            {result.analysis?.attachments && (
-              <AttachmentPayloadCard attachments={result.analysis.attachments} />
+            {/* Attachments Breakdown - always show if analysis exists */}
+            {result.analysis && (
+              <AttachmentPayloadCard attachments={result.analysis.attachments || []} />
             )}
 
             {/* Phase 4: Authentication Protocols (SPF / DKIM / DMARC) */}
