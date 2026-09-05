@@ -36,3 +36,51 @@ body {
   background: #050505 !important;
 }
 
+/* =========================================
+   Phase 15: PDF Export (Print Styles)
+   ========================================= */
+@media print {
+  /* Force dark mode background for digital PDFs */
+  body {
+    background-color: #0a0a0a !important;
+    color: #ededed !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide interactive/unnecessary UI elements */
+  .print-hidden,
+  aside,
+  button:not(.print-visible),
+  ::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  /* Ensure the main report area spans the full page */
+  section {
+    width: 100% !important;
+    max-width: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Ensure panels don't get cut in half across pages */
+  .print-panel-break-avoid {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Force expanded state for payload and attachments */
+  .print-expand {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  
+  /* Hide the fade-out gradients */
+  .print-hide-gradient {
+    display: none !important;
+  }
+}
+

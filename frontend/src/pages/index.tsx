@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import { Lexend } from "next/font/google";
+import { useReactToPrint } from "react-to-print";
 import Header from "../components/Header";
 import EvidenceIngestion from "../components/EvidenceIngestion";
 import InvestigationHistory from "../components/InvestigationHistory";
@@ -31,6 +32,13 @@ export default function Home() {
   const [investigations, setInvestigations] = useState<InvestigationSummary[]>([]);
   const [historyLoading, setHistoryLoading] = useState<boolean>(false);
   const [selectedBadge, setSelectedBadge] = useState<BadgeInfo | null>(null);
+
+  // Phase 15: Print / Export PDF Ref
+  const reportRef = useRef<HTMLElement>(null);
+  const handlePrint = useReactToPrint({
+    contentRef: reportRef,
+    documentTitle: result ? `Forensic_Report_${result.filename}` : "Forensic_Report",
+  });
 
   // Determine base API URL
   const getApiUrl = () => {
@@ -200,21 +208,45 @@ export default function Home() {
             </aside>
 
             {/* Main Report Content */}
-            <section className="flex-1 min-w-0 bg-[#0a0a0a] p-4 md:p-8 border border-gray-800 rounded-xl shadow-2xl space-y-6 animate-fade-in">
+            <section ref={reportRef} className="flex-1 min-w-0 bg-[#0a0a0a] p-4 md:p-8 border border-gray-800 rounded-xl shadow-2xl space-y-6 animate-fade-in print:p-0 print:border-none print:shadow-none">
+            
             {/* Header with quick close / case info */}
-            <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+            <div className="flex items-center justify-between border-b border-gray-800 pb-3 print:border-b-2 print:border-gray-600 print:mb-8">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-green-400"></span>
-                <span className="text-xs font-mono font-bold uppercase tracking-wider text-white">
-                  Active Forensic Dossier: {result.filename}
+                <span className="w-2 h-2 rounded-full bg-green-400 print-hidden"></span>
+                <span className="text-xs font-mono font-bold uppercase tracking-wider text-white print:text-xl print:text-green-500">
+                  Forensic Dossier: {result.filename}
                 </span>
               </div>
-              <button
-                onClick={() => setResult(null)}
-                className="text-xs font-mono text-gray-500 hover:text-white px-2 py-1 bg-zinc-900 border border-zinc-800 rounded transition-colors"
-              >
-                ✕ Close Report
-              </button>
+              <div className="flex items-center gap-2 print-hidden">
+                <button
+                  onClick={() => handlePrint()}
+                  className="text-xs font-mono text-indigo-400 hover:text-white px-2 py-1 bg-indigo-950/30 border border-indigo-900/50 rounded transition-colors flex items-center gap-2"
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                  Export PDF
+                </button>
+                <button
+                  onClick={() => setResult(null)}
+                  className="text-xs font-mono text-gray-500 hover:text-white px-2 py-1 bg-zinc-900 border border-zinc-800 rounded transition-colors"
+                >
+                  ✕ Close Report
+                </button>
+              </div>
+            </div>
+
+            {/* Print Only Meta Header */}
+            <div className="hidden print:block mb-8 pb-4 border-b border-gray-800 space-y-2">
+              <div className="flex justify-between items-end">
+                <div>
+                  <h1 className="text-3xl font-bold font-sans tracking-tight text-white">Security Operations Center</h1>
+                  <p className="text-sm font-mono text-gray-400 mt-1">Automated Threat Intelligence & Forensic Analysis</p>
+                </div>
+                <div className="text-right font-mono text-xs text-gray-500 space-y-1">
+                  <p>Case ID: {result.id.substring(0, 8).toUpperCase()}</p>
+                  <p>Generated: {new Date().toLocaleString()}</p>
+                </div>
+              </div>
             </div>
 
             {/* Phase 10: Multi-Factor Risk Score Engine */}

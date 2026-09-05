@@ -127,7 +127,7 @@ export default function AttachmentPayloadCard({ attachments }: AttachmentPayload
                 <div className="flex items-center gap-3 shrink-0 ml-3">
                   <VerdictBadge verdict={att.verdict} />
                   <svg
-                    className={`w-4 h-4 text-gray-600 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                    className={`print-hidden w-4 h-4 text-gray-600 transition-transform ${isOpen ? 'rotate-180' : ''}`}
                     fill="none" stroke="currentColor" viewBox="0 0 24 24"
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -136,8 +136,7 @@ export default function AttachmentPayloadCard({ attachments }: AttachmentPayload
               </button>
 
               {/* Expanded Details */}
-              {isOpen && (
-                <div className="px-4 pb-4 space-y-4 border-t border-gray-800/60 pt-3">
+              <div className={`px-4 pb-4 space-y-4 border-t border-gray-800/60 pt-3 ${isOpen ? 'block' : 'hidden'} print:block`}>
 
                   {/* Threat Score Bar */}
                   <ThreatScoreBar score={att.threatScore} />
@@ -230,7 +229,6 @@ export default function AttachmentPayloadCard({ attachments }: AttachmentPayload
                     </div>
                   )}
                 </div>
-              )}
             </div>
           );
         })}

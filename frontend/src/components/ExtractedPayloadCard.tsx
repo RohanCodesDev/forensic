@@ -67,18 +67,18 @@ export default function ExtractedPayloadCard({ evidence }: ExtractedPayloadCardP
           <span className="text-gray-500 text-xs uppercase font-semibold block">Decrypted Body Snippet</span>
           <button 
             onClick={() => setIsExpanded(!isExpanded)}
-            className="text-[10px] font-mono text-indigo-400 hover:text-indigo-300 border border-indigo-900/50 hover:bg-indigo-900/20 px-3 py-1 rounded transition-colors uppercase tracking-wider"
+            className="print-hidden text-[10px] font-mono text-indigo-400 hover:text-indigo-300 border border-indigo-900/50 hover:bg-indigo-900/20 px-3 py-1 rounded transition-colors uppercase tracking-wider"
           >
             {isExpanded ? 'Collapse Payload' : 'Expand Full Payload'}
           </button>
         </div>
         
         <div className="relative border border-gray-800 rounded-md bg-[#050505]">
-          <div className={`p-4 font-mono text-sm text-green-500 overflow-hidden transition-all duration-500 ${isExpanded ? '' : 'max-h-64'}`}>
+          <div className={`print-expand p-4 font-mono text-sm text-green-500 overflow-hidden transition-all duration-500 ${isExpanded ? '' : 'max-h-64'}`}>
             <pre className="whitespace-pre-wrap break-words">{evidence.textBodySnippet || "No plain text body content."}</pre>
           </div>
           {!isExpanded && (
-            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none rounded-b-md"></div>
+            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none rounded-b-md print-hide-gradient"></div>
           )}
         </div>
       </div>
