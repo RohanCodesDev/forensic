@@ -94,6 +94,19 @@ export interface NlpAnalysis {
   summary: string;
 }
 
+export interface AiManipulationTechnique {
+  technique: string;
+  quote: string;
+  explanation: string;
+}
+
+export interface AiAnalysis {
+  aiConfidence: number; // 0-100
+  aiSummary: string;
+  manipulationTechniques: AiManipulationTechnique[];
+  recommendedAction: string;
+}
+
 export interface RiskFactor {
   name: string;
   points: number;
@@ -118,6 +131,7 @@ export interface FullAnalysisResult {
   routeAnalysis: RouteAnalysis | null;
   threatIntel: ThreatIndicator[];
   nlpAnalysis?: NlpAnalysis | null;
+  aiAnalysis?: AiAnalysis | null;
 }
 
 export interface EmailEvidence {

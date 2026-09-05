@@ -4,6 +4,7 @@ import { analyzeSmtpRoute } from './route.service';
 import { analyzeThreats } from './threat.service';
 import { calculateRiskScore } from './risk.service';
 import { analyzeNlp } from './nlp.service';
+import { analyzeWithAI } from './ai.service';
 
 /**
  * Master Orchestrator for all Forensic Analysis Services
@@ -122,6 +123,27 @@ export const runFullAnalysis = async (emailData: any, parsed: any, attachments: 
   // Maintain backward compatibility for threatLevel string
   const threatLevel = riskEvaluation.severity === 'LOW' ? 'CLEAN' : riskEvaluation.severity === 'MEDIUM' ? 'SUSPICIOUS' : 'HIGH_RISK';
 
+
+  // PHASE 12: True AI Analysis (LLM Integration)
+  const forensicContext = {
+    riskScore: riskEvaluation.score,
+    severity: riskEvaluation.severity,
+    anomalies,
+    spf: emailData.spfResult,
+    dkim: emailData.dkimResult,
+    dmarc: emailData.dmarcResult,
+    domainAnalysis,
+    urlAnalysis,
+    threatIntel
+  };
+
+  let aiAnalysis = null;
+  try {
+    const textBody = emailData.textBodySnippet || '';
+    aiAnalysis = await analyzeWithAI(textBody, emailData.subject || '', forensicContext);
+  } catch (error: any) {
+    console.error('[AI Analysis Error] Failed to reach Groq API:', error.message);
+  }
   return {
     threatLevel,
     riskEvaluation,
@@ -131,6 +153,7 @@ export const runFullAnalysis = async (emailData: any, parsed: any, attachments: 
     urlAnalysis,
     routeAnalysis,
     threatIntel,
-    nlpAnalysis
+    nlpAnalysis,
+    aiAnalysis
   };
 };

@@ -15,6 +15,9 @@ import SmtpRouteCard from "../components/SmtpRouteCard";
 import AnomaliesAlert from "../components/AnomaliesAlert";
 import BadgeModal from "../components/BadgeModal";
 import NlpAnalysisCard from "../components/NlpAnalysisCard";
+import AiAnalystCard from "../components/AiAnalystCard";
+import ThreatGraphCard from "../components/ThreatGraphCard";
+import GeoRouteMap from "../components/GeoRouteMap";
 import { EmailEvidence, InvestigationSummary, BadgeInfo } from "../types/forensic";
 
 const lexend = Lexend({ subsets: ["latin"] });
@@ -140,7 +143,7 @@ export default function Home() {
         <meta name="description" content="AI-Powered Email Threat Detection, Geolocation and Forensic Intelligence Platform" />
       </Head>
 
-      <main className="max-w-5xl mx-auto space-y-6 md:space-y-8 pt-4 md:pt-8">
+      <main className="max-w-7xl mx-auto space-y-6 md:space-y-8 pt-4 md:pt-8">
         <Header
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -168,7 +171,35 @@ export default function Home() {
 
         {/* ACTIVE INVESTIGATION REPORT VIEW */}
         {result && (
-          <section className="bg-[#0a0a0a] p-4 md:p-8 border border-gray-800 rounded-xl shadow-2xl space-y-6 animate-fade-in">
+          <div className="flex flex-col lg:flex-row gap-6 items-start">
+            
+            {/* Sticky Navigation Sidebar */}
+            <aside className="hidden lg:block sticky top-8 w-64 shrink-0 space-y-2 border border-gray-800 bg-[#0a0a0a] p-4 rounded-xl shadow-2xl animate-fade-in">
+              <h3 className="font-mono text-xs uppercase text-gray-500 font-bold mb-4 tracking-wider">Report Index</h3>
+              {[
+                { id: "section-risk", label: "Risk Engine" },
+                { id: "section-ai", label: "AI Analyst" },
+                { id: "section-nlp", label: "NLP Heuristics" },
+                { id: "section-payload", label: "Message Payload" },
+                { id: "section-auth", label: "Authentication" },
+                { id: "section-domain", label: "Domain Forensics" },
+                { id: "section-graph", label: "Threat Graph" },
+                { id: "section-threat", label: "Threat Intel" },
+                { id: "section-url", label: "URL Analysis" },
+                { id: "section-route", label: "Routing Hops" }
+              ].map(sec => (
+                <a 
+                  key={sec.id}
+                  href={`#${sec.id}`}
+                  className="block text-sm font-mono text-gray-400 hover:text-indigo-400 hover:bg-indigo-950/30 px-3 py-2 rounded transition-colors"
+                >
+                  {sec.label}
+                </a>
+              ))}
+            </aside>
+
+            {/* Main Report Content */}
+            <section className="flex-1 min-w-0 bg-[#0a0a0a] p-4 md:p-8 border border-gray-800 rounded-xl shadow-2xl space-y-6 animate-fade-in">
             {/* Header with quick close / case info */}
             <div className="flex items-center justify-between border-b border-gray-800 pb-3">
               <div className="flex items-center gap-2">
@@ -187,16 +218,29 @@ export default function Home() {
 
             {/* Phase 10: Multi-Factor Risk Score Engine */}
             {result.analysis?.riskEvaluation && (
-              <RiskScoreGauge riskEvaluation={result.analysis.riskEvaluation} />
+              <div id="section-risk">
+                <RiskScoreGauge riskEvaluation={result.analysis.riskEvaluation} />
+              </div>
+            )}
+
+            {/* Phase 12: True AI LLM Semantic Analysis */}
+            {result.analysis?.aiAnalysis && (
+              <div id="section-ai">
+                <AiAnalystCard aiAnalysis={result.analysis.aiAnalysis} />
+              </div>
             )}
 
             {/* Phase 11: NLP Social Engineering & BEC Heuristics */}
             {result.analysis?.nlpAnalysis && (
-              <NlpAnalysisCard nlpAnalysis={result.analysis.nlpAnalysis} />
+              <div id="section-nlp">
+                <NlpAnalysisCard nlpAnalysis={result.analysis.nlpAnalysis} />
+              </div>
             )}
 
             {/* Extracted Payload Headers & Decrypted Body */}
-            <ExtractedPayloadCard evidence={result} />
+            <div id="section-payload">
+              <ExtractedPayloadCard evidence={result} />
+            </div>
 
             {/* Attachments Breakdown */}
             {result.analysis?.attachments && (
@@ -204,45 +248,68 @@ export default function Home() {
             )}
 
             {/* Phase 4: Authentication Protocols (SPF / DKIM / DMARC) */}
-            <AuthAuditCard
-              spfResult={result.spfResult}
-              dkimResult={result.dkimResult}
-              dmarcResult={result.dmarcResult}
-              onOpenBadge={setSelectedBadge}
-            />
+            <div id="section-auth">
+              <AuthAuditCard
+                spfResult={result.spfResult}
+                dkimResult={result.dkimResult}
+                dmarcResult={result.dmarcResult}
+                onOpenBadge={setSelectedBadge}
+              />
+            </div>
 
             {/* Phase 5: Domain Forensics & Typosquatting */}
             {result.analysis?.domainAnalysis && (
-              <DomainForensicsCard domainAnalysis={result.analysis.domainAnalysis} />
+              <div id="section-domain">
+                <DomainForensicsCard domainAnalysis={result.analysis.domainAnalysis} />
+              </div>
+            )}
+
+            {/* Phase 8: Geographical Route Map */}
+            {result.analysis?.routeAnalysis && (
+              <GeoRouteMap 
+                hops={result.analysis.routeAnalysis.hops}
+              />
+            )}
+
+            {/* Phase 13: Interactive Threat Graph */}
+            <div id="section-graph">
+              <ThreatGraphCard evidence={result} />
+            </div>
+
+            {/* Phase 9: Global Threat Intelligence Feeds */}
+            {result.analysis?.threatIntel && (
+              <div id="section-threat">
+                <ThreatIntelCard threatIntel={result.analysis.threatIntel} />
+              </div>
             )}
 
             {/* Phase 6: Embedded Links & URL Analysis */}
             {result.analysis?.urlAnalysis && (
-              <UrlAnalysisCard
-                urlAnalysis={result.analysis.urlAnalysis}
-                onOpenBadge={setSelectedBadge}
-              />
-            )}
-
-            {/* Phase 9: Global Threat Intelligence Feeds */}
-            {result.analysis?.threatIntel && (
-              <ThreatIntelCard threatIntel={result.analysis.threatIntel} />
+              <div id="section-url">
+                <UrlAnalysisCard
+                  urlAnalysis={result.analysis.urlAnalysis}
+                  onOpenBadge={setSelectedBadge}
+                />
+              </div>
             )}
 
             {/* Phase 7 & 8: SMTP Route & Interactive Geolocation Map */}
             {result.analysis?.routeAnalysis && (
-              <SmtpRouteCard
-                routeAnalysis={result.analysis.routeAnalysis}
-                rawReceivedHeaders={result.receivedHeaders}
-                onOpenBadge={setSelectedBadge}
-              />
+              <div id="section-route">
+                <SmtpRouteCard
+                  routeAnalysis={result.analysis.routeAnalysis}
+                  rawReceivedHeaders={result.receivedHeaders}
+                  onOpenBadge={setSelectedBadge}
+                />
+              </div>
             )}
 
             {/* Forensic Anomalies Alert Box */}
-            {result.analysis?.anomalies && (
+            {result.analysis?.anomalies && result.analysis.anomalies.length > 0 && (
               <AnomaliesAlert anomalies={result.analysis.anomalies} />
             )}
           </section>
+          </div>
         )}
       </main>
 

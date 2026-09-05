@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import { simpleParser } from 'mailparser';
 import { PrismaClient } from '@prisma/client';
-import crypto from 'crypto';
 import { runFullAnalysis } from '../services/analysis.service';
+import { parseRawEmail } from '../services/ingestion.service';
 
 const prisma = new PrismaClient();
 
@@ -18,94 +18,37 @@ export const uploadEmail = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    // Cryptographic SHA-256 hash of the evidence file buffer for non-repudiation
-    const sha256Hash = crypto.createHash('sha256').update(req.file.buffer).digest('hex');
-
-    // Parse the raw email buffer
-    const parsed = await simpleParser(req.file.buffer);
-
-    // Extract Authentication-Results header (with fallback to Received-SPF and DKIM-Signature)
-    const authHeaderRaw = parsed.headers.get('authentication-results');
-    const authHeaderStr = Array.isArray(authHeaderRaw) ? authHeaderRaw.join(' ') : String(authHeaderRaw || '');
-
-    const parseAuthStatus = (protocol: string) => {
-      const match = authHeaderStr.match(new RegExp(`${protocol}=([a-zA-Z0-9_-]+)`, 'i'));
-      if (match) return match[1].toUpperCase();
-
-      // Fallbacks
-      if (protocol === 'spf') {
-        const receivedSpf = parsed.headers.get('received-spf');
-        if (receivedSpf) {
-          const spfStr = Array.isArray(receivedSpf) ? receivedSpf.join(' ') : String(receivedSpf);
-          const spfMatch = spfStr.match(/^(pass|fail|softfail|neutral|none|error)/i);
-          if (spfMatch) return spfMatch[1].toUpperCase();
-        }
-      }
-
-      if (protocol === 'dkim') {
-        const dkimSig = parsed.headers.get('dkim-signature');
-        if (dkimSig) return 'SIGNED';
-      }
-
-      return authHeaderStr ? 'NONE' : 'MISSING';
-    };
-
-    const spfResult = parseAuthStatus('spf');
-    const dkimResult = parseAuthStatus('dkim');
-    const dmarcResult = parseAuthStatus('dmarc');
-
-    // Extract attachment details and flag risky extensions
-    const riskyExtensions = ['.exe', '.scr', '.vbs', '.bat', '.cmd', '.js', '.ps1', '.iso', '.img', '.jar', '.hta', '.cpl', '.docm', '.xlsm'];
-    const attachments = (parsed.attachments || []).map((att: any) => {
-      const filename = att.filename || 'unnamed_attachment';
-      const ext = filename.substring(filename.lastIndexOf('.')).toLowerCase();
-      const isRisky = riskyExtensions.includes(ext);
-      
-      // Calculate attachment SHA-256 if content buffer is present
-      const attHash = att.content ? crypto.createHash('sha256').update(att.content).digest('hex') : null;
-
-      return {
-        filename,
-        contentType: att.contentType,
-        size: att.size,
-        isRisky,
-        sha256: attHash
-      };
-    });
-
-    // Safely get received headers (can be string, array, or undefined)
-    const receivedHeaderRaw = parsed.headers.get('received');
-    const receivedHeaders = Array.isArray(receivedHeaderRaw) 
-      ? receivedHeaderRaw 
-      : (receivedHeaderRaw ? [receivedHeaderRaw] : []);
-
-    const emailData = {
+    // Pass buffer to ingestion service to extract everything
+    const ingestion = await parseRawEmail(req.file.buffer);
+    
+    const emailDataWithFilename = {
+      ...ingestion.emailData,
       filename: req.file.originalname,
-      sha256Hash,
-      from: (parsed.from as any)?.text || '',
-      to: (parsed.to as any)?.text || '',
-      cc: (parsed.cc as any)?.text || '',
-      subject: parsed.subject || '',
-      date: parsed.date ? parsed.date.toISOString() : '',
-      messageId: parsed.messageId || '',
-      replyTo: (parsed.replyTo as any)?.text || '',
-      returnPath: (parsed.headers.get('return-path') as any)?.text || (typeof parsed.headers.get('return-path') === 'string' ? parsed.headers.get('return-path') : ''),
-      textBodySnippet: parsed.text ? parsed.text.substring(0, 500) + '...' : 'No text body',
-      htmlBodyExists: !!parsed.html,
-      attachmentCount: attachments.length,
-      receivedHeaders: receivedHeaders as any,
-      spfResult,
-      dkimResult,
-      dmarcResult
     };
 
-    // Delegate to the Master Orchestrator Service
-    const analysisResult = await runFullAnalysis(emailData, parsed, attachments);
+    // Run deep forensics using the parsed data
+    const analysisResult = await runFullAnalysis(emailDataWithFilename, ingestion.parsed, ingestion.attachments);
 
     // Save evidence immutably to PostgreSQL along with complete analysis report
     const savedEmail = await prisma.email.create({
       data: {
-        ...emailData,
+        filename: req.file.originalname,
+        sha256Hash: ingestion.sha256Hash,
+        from: emailDataWithFilename.from,
+        to: emailDataWithFilename.to,
+        cc: emailDataWithFilename.cc,
+        subject: emailDataWithFilename.subject,
+        date: emailDataWithFilename.date,
+        messageId: emailDataWithFilename.messageId,
+        replyTo: emailDataWithFilename.replyTo,
+        returnPath: emailDataWithFilename.returnPath,
+        textBodySnippet: emailDataWithFilename.textBodySnippet,
+        htmlBodyExists: emailDataWithFilename.htmlBodyExists,
+        attachmentCount: emailDataWithFilename.attachmentCount,
+        receivedHeaders: emailDataWithFilename.receivedHeaders,
+        spfResult: ingestion.spfResult,
+        dkimResult: ingestion.dkimResult,
+        dmarcResult: ingestion.dmarcResult,
         analysisReport: {
           create: {
             threatLevel: analysisResult.threatLevel,
@@ -118,8 +61,9 @@ export const uploadEmail = async (req: Request, res: Response): Promise<void> =>
             urlAnalysis: (analysisResult.urlAnalysis || []) as any,
             routeAnalysis: (analysisResult.routeAnalysis || {}) as any,
             threatIntel: (analysisResult.threatIntel || []) as any,
-            attachments: (attachments || []) as any,
+            attachments: (ingestion.attachments || []) as any,
             nlpAnalysis: (analysisResult.nlpAnalysis || {}) as any,
+            aiAnalysis: (analysisResult.aiAnalysis || {}) as any,
           }
         }
       },
@@ -204,7 +148,8 @@ export const getEmailById = async (req: Request, res: Response): Promise<void> =
       urlAnalysis: report.urlAnalysis || [],
       routeAnalysis: report.routeAnalysis,
       threatIntel: report.threatIntel || [],
-      nlpAnalysis: report.nlpAnalysis || null
+      nlpAnalysis: report.nlpAnalysis || null,
+      aiAnalysis: report.aiAnalysis || null
     } : null;
 
     res.json({

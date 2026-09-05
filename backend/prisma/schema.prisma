@@ -46,6 +46,7 @@ model AnalysisReport {
   threatIntel     Json?    // IOC hits across AbuseIPDB, URLhaus, etc.
   attachments     Json?    // Attachment metadata and risk flags
   nlpAnalysis     Json?    // NLP social engineering & BEC heuristic results
+  aiAnalysis      Json?    // True LLM (Groq) semantic analysis
   createdAt       DateTime @default(now())
 }
 
