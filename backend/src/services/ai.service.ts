@@ -27,10 +27,15 @@ export const analyzeWithAI = async (
   subject: string,
   forensicContext: any
 ): Promise<AiAnalysis | null> => {
-  if (!process.env.GROQ_API_KEY) {
-    console.warn('GROQ_API_KEY not found. Skipping AI Analysis.');
+  dotenv.config();
+  const apiKey = process.env.GROQ_API_KEY;
+
+  if (!apiKey || apiKey.trim() === '') {
+    console.warn('[AI Service] GROQ_API_KEY not found in environment. Skipping LLM Analysis.');
     return null;
   }
+
+  const groq = new Groq({ apiKey });
 
   const prompt = `
 You are an elite Cybersecurity Incident Responder and Forensic Analyst. 
@@ -60,9 +65,10 @@ Return your analysis strictly in the following JSON format without markdown wrap
 `;
 
   try {
+    console.log('[AI Service] Calling Groq LLM (qwen/qwen3.8-27b)...');
     const chatCompletion = await groq.chat.completions.create({
       messages: [{ role: 'user', content: prompt }],
-      model: 'qwen/qwen3.8-27b', // Valid active model
+      model: 'qwen/qwen3.8-27b',
       temperature: 0.2,
       response_format: { type: 'json_object' }
     });
@@ -71,11 +77,12 @@ Return your analysis strictly in the following JSON format without markdown wrap
     
     if (responseContent) {
       const parsed = JSON.parse(responseContent) as AiAnalysis;
+      console.log('[AI Service] Groq LLM analysis successful, confidence:', parsed.aiConfidence);
       return parsed;
     }
     return null;
-  } catch (error) {
-    console.error('Groq AI Analysis failed:', error);
+  } catch (error: any) {
+    console.error('[AI Service] Groq AI Analysis failed:', error.message || error);
     return null;
   }
 };

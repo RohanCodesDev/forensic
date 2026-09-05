@@ -173,3 +173,64 @@ export const deleteEmail = async (req: Request, res: Response): Promise<void> =>
     res.status(500).json({ status: 'error', message: 'Failed to delete investigation: ' + error.message });
   }
 };
+
+export const triggerAiAnalysis = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = String(req.params.id);
+    const email: any = await prisma.email.findUnique({
+      where: { id },
+      include: { analysisReport: true }
+    });
+
+    if (!email) {
+      res.status(404).json({ status: 'error', message: 'Email investigation not found' });
+      return;
+    }
+
+    const { analyzeWithAI } = await import('../services/ai.service');
+
+    const report = email.analysisReport;
+    const forensicContext = {
+      riskScore: report?.riskScore || 0,
+      severity: report?.severity || 'LOW',
+      anomalies: report?.anomalies || [],
+      spf: email.spfResult,
+      dkim: email.dkimResult,
+      dmarc: email.dmarcResult,
+      domainAnalysis: report?.domainAnalysis,
+      urlAnalysis: report?.urlAnalysis,
+      threatIntel: report?.threatIntel,
+    };
+
+    const aiResult = await analyzeWithAI(
+      email.textBodySnippet || '',
+      email.subject || '',
+      forensicContext
+    );
+
+    if (!aiResult) {
+      res.status(500).json({
+        status: 'error',
+        message: 'Groq AI Analysis failed to generate a response. Verify GROQ_API_KEY in backend/.env',
+      });
+      return;
+    }
+
+    // Persist result to database
+    if (report) {
+      await prisma.analysisReport.update({
+        where: { id: report.id },
+        data: { aiAnalysis: aiResult as any }
+      });
+    }
+
+    res.json({
+      status: 'success',
+      message: 'AI Semantic Analysis generated and persisted successfully.',
+      aiAnalysis: aiResult,
+    });
+  } catch (error: any) {
+    console.error('Trigger AI Analysis error:', error);
+    res.status(500).json({ status: 'error', message: 'AI Analysis execution error: ' + error.message });
+  }
+};

@@ -194,3 +194,54 @@ export interface BadgeInfo {
   title: string;
   description: string;
 }
+
+export interface CampaignEmailSummary {
+  id: string;
+  filename: string;
+  subject: string;
+  from: string;
+  to: string;
+  date: string | null;
+  createdAt: string;
+  riskScore: number;
+  threatLevel: string;
+  severity: string;
+  sha256Hash?: string | null;
+}
+
+export interface SharedIOC {
+  type: 'IP' | 'DOMAIN' | 'URL' | 'SUBJECT_TEMPLATE' | 'THREAT_IOC';
+  value: string;
+  count: number;
+  riskWeight: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  description: string;
+}
+
+export interface CampaignCluster {
+  campaignId: string;
+  name: string;
+  threatLevel: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  confidenceScore: number;
+  avgRiskScore: number;
+  totalEmails: number;
+  targetCount: number;
+  firstSeen: string;
+  lastSeen: string;
+  sharedIocs: SharedIOC[];
+  emails: CampaignEmailSummary[];
+  investigativeSummary: string;
+  recommendedAction: string;
+}
+
+export interface CampaignCorrelationResult {
+  totalEmailsAnalyzed: number;
+  totalCampaignsDetected: number;
+  isolatedEmailsCount: number;
+  campaigns: CampaignCluster[];
+  topSharedInfrastructure: {
+    ips: { value: string; count: number }[];
+    domains: { value: string; count: number }[];
+    urls: { value: string; count: number }[];
+  };
+}
+
