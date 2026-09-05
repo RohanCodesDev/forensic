@@ -1,40 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# Frontend documentation
 
-## Getting Started
+This frontend is the investigation dashboard for the forensic email platform. It provides a dark-themed security console where users can upload an `.eml` file, review extracted evidence, inspect risk findings, and export a printable incident report.
 
-First, run the development server:
+## Stack
+
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS
+- Leaflet for route visualization
+- Custom forensic UI cards and graphs
+
+## Local setup
+
+From this folder:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open http://localhost:3000 in the browser.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+> If you are using Windows PowerShell and script execution is blocked, run `npm.cmd run dev` instead of `npm run dev`.
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+## Environment configuration
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+Set an API target if the frontend is not running on the same machine as the backend:
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
 
-## Learn More
+This is typically set in the environment used by the local shell or a `.env.local` file.
 
-To learn more about Next.js, take a look at the following resources:
+## Main user flow
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+1. Choose an email file to upload.
+2. The app sends the file to the backend API.
+3. The backend parses the `.eml` and returns the analysis payload.
+4. The frontend renders risk score, route map, threat indicators, domain checks, and extracted evidence.
+5. Users can view prior investigations and export a PDF-like report.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## App sections
 
-## Deploy on Vercel
+- Evidence ingestion
+- Active case dashboard
+- Threat score gauge
+- Authentication audit
+- Domain forensics
+- URL analysis
+- SMTP route hops
+- Geographic route map
+- Threat graph
+- Threat intel feed
+- AI and NLP summary panels
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Files to know
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+- `src/pages/index.tsx` — main dashboard and API integration
+- `src/components/*` — forensic card components
+- `src/types/forensic.ts` — data contracts used across the app
+- `src/utils/graphBuilder.ts` — relationship graph generation
+
+## Production build
+
+```bash
+npm run build
+npm run start
+```
+
+## Notes
+
+- The dashboard expects the backend API to be reachable at the configured API URL.
+- Some components render client-side only and are intentionally guarded for SSR safety.
+- The app is designed for investigative and security research workflows, not for public internet exposure without access control.
+

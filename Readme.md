@@ -1,403 +1,226 @@
-# Build My AI-Powered Email Threat Detection & Forensic Intelligence Platform
+# AI-Powered Email Threat Detection & Forensic Intelligence Platform
 
-I want to build a project called:
+A full-stack forensic analysis platform for suspicious email investigation. The project ingests raw `.eml` files, reconstructs SMTP routing and authentication metadata, checks domains and URLs for impersonation and phishing risk, correlates threat intelligence, and presents a security dashboard with a risk score and investigation report.
 
-**“AI-Powered Email Threat Detection, Geolocation and Forensic Intelligence Platform”**
+## What the project does
 
-I am a **beginner in cybersecurity, email forensics, threat intelligence, and machine learning**, but I already have some development experience with:
+- Parses `.eml` files using a Node.js backend and extracts headers, body content, attachments, and routing metadata.
+- Detects header anomalies such as mismatched `Reply-To`, `Return-Path`, and missing `Message-ID`.
+- Audits SPF, DKIM, and DMARC results.
+- Analyzes domains for typosquatting, freemail abuse, and brand impersonation.
+- Extracts links and scores them for hidden URLs, shorteners, raw IPs, and suspicious keywords.
+- Reconstructs the `Received:` relay chain and identifies the likely origin IP.
+- Resolves origin IPs to geolocation and overlays the route on a map.
+- Cross-references IPs, domains, and URLs against a threat intel layer.
+- Produces a risk evaluation with severity tiers and explanation factors.
+- Stores saved investigations in PostgreSQL via Prisma.
 
-* JavaScript / TypeScript
-* Node.js
-* Express.js
-* Next.js / React
-* PostgreSQL
-* Prisma
-* Tailwind CSS
-* REST APIs
-* Basic backend development
+## Current status
 
-Therefore, I want you to act as both:
+This repository currently includes:
 
-1. **A cybersecurity mentor/teacher**
-2. **A senior full-stack developer**
+- Express + TypeScript backend API
+- Prisma + PostgreSQL persistence layer
+- Next.js frontend dashboard
+- Investigation upload workflow
+- Email risk scoring and forensic widgets
+- Threat intelligence and route map visualization
 
-Do NOT just generate the entire project at once. I want to **learn while building it**, progressively.
-
----
-
-# 📜 Completed Phases Log & Knowledge Base
-
-### ✅ PHASE 1 — Create the Full-Stack Foundation
-* **What We Built:** Express.js + TypeScript backend server with Prisma ORM connected to PostgreSQL, and a Next.js frontend dashboard.
-* **Why It Matters:** Forensic evidence needs a reliable, structured database store (PostgreSQL) so that analyzed emails can be preserved immutably without risk of alteration.
-
-### ✅ PHASE 2 — Email Upload & MIME Parsing
-* **What We Built:** Integrated `simpleParser` (`mailparser`) to ingest `.eml` files, extract headers (`From`, `To`, `Subject`, `Date`, `Message-ID`, `Reply-To`, `Return-Path`, `Received`), text/HTML body, and attachments, then save them into PostgreSQL.
-* **Why It Matters:** Raw `.eml` files are MIME-encoded text blocks. Parsing breaks down the raw MIME structure into queryable metadata so security tools can inspect individual headers and body snippets.
-
-### ✅ PHASE 3 — Email Header Forensics & Anomaly Detection
-* **What We Built:** Implemented automated header checks in `email.controller.ts` (detecting **Reply-To mismatches**, **Return-Path mismatches**, and **missing Message-IDs**) and connected the results to the frontend dashboard UI.
-* **Why It Matters:** 
-  * **Reply-To / Return-Path Mismatches:** Phishers often spoof the visible `From:` address (e.g., `support@apple.com`), but set the `Reply-To:` or `Return-Path:` to an attacker-controlled server so replies or bounced mails come back to them.
-  * **Missing Message-ID:** Standard, legitimate email servers automatically assign a unique `Message-ID` header. Custom spam/phishing scripts often fail to generate one.
-
-### ✅ PHASE 4 — SPF, DKIM & DMARC Authentication Analysis
-* **What We Built:** Added regex-based extraction for `Authentication-Results` headers in `email.controller.ts`, updated Prisma database schema with `spfResult`, `dkimResult`, and `dmarcResult` fields, and created a dedicated color-coded **Protocol Authentication Audit** panel on the Next.js frontend.
-* **Why It Matters:** 
-  * **SPF (Sender Policy Framework):** Verifies if the sending server's IP is allowed by the domain owner in DNS.
-  * **DKIM (DomainKeys Identified Mail):** Uses a cryptographic digital signature to ensure the email content wasn't altered in transit.
-  * **DMARC (Domain-based Message Authentication, Reporting & Conformance):** Verifies alignment between the `From:` domain and SPF/DKIM verification to block domain impersonation attacks.
-
-### ✅ PHASE 5 — Sender & Domain Analysis (Brand Impersonation & Typosquatting)
-* **What We Built:** Created `domain.service.ts` to compute Levenshtein distances against major brand domains, detect keyword stacking (e.g., `apple-security-login.com`), and flag freemail impersonation (e.g., "Netflix Support" sending from `@gmail.com`). Added a **Domain Forensics & Impersonation** panel to the frontend.
-* **Why It Matters:** Attackers rely on human visual skimming. By replacing `l` with `1` (`paypa1.com`) or registering lookalike domains, they bypass purely technical checks like SPF (since they own the fake domain). The domain analysis engine catches these cognitive tricks algorithmically.
-
-### ✅ PHASE 6 — URL Extraction & Risk Analysis
-* **What We Built:** Created `url.service.ts` to extract embedded hyperlinks from plain text and HTML emails using RegEx. Analyzes domains for risk factors: raw IP routing, URL shorteners (like `bit.ly`), HTTP downgrades, suspicious path keywords, and brand impersonation in paths. Exposed the data visually in the frontend.
-* **Why It Matters:** Attackers often mask malicious destinations via URL shorteners or raw IPs to bypass automated spam filters. Highlighting these tactics instantly reveals the true, dangerous destination to the forensic analyst.
-
-### ✅ PHASE 7 — IP & SMTP Route Analysis (Received Chain Forensics & Origin Identification)
-* **What We Built:** Built `route.service.ts` to parse the chronological chain of `Received:` headers from bottom-to-top (Hop 1 Origin to Final Destination MX). Extracted relay IPs, hostnames, transfer protocols, and calculated hop latency delays while identifying the true public Originating IP. Added an interactive **SMTP Relay Hop Chain & Origin Trace** timeline panel to the frontend.
-* **Why It Matters:** Attackers can easily spoof header display names like `From: support@paypal.com`, but cannot alter the physical TCP/IP connection logs recorded by intermediate and destination mail transfer agents. Reverse-parsing the `Received:` headers reveals the physical server origin and identifies forged headers or time-travel clock skews.
-
-### ✅ PHASE 8 — IP Geolocation & Leaflet Interactive Map Visualization
-* **What We Built:** Created `geo.service.ts` to resolve public IP addresses into geographic metadata (Country, Region, City, Coordinates [lat, lon], ISP, Autonomous System Number ASN, Timezone) with an offline-resilient caching fallback. Built an interactive dark-themed Leaflet Map component (`GeoRouteMap.tsx`) with dynamic SSR-safe rendering, custom animated hop marker badges, rich hover popups, and route polylines connecting the origin server to the destination MX across the globe.
-* **Why It Matters:** Visualizing the physical geographical route of an email across continents immediately exposes impossible travel, foreign server relays, or bulletproof hosting providers (such as known Tor exit nodes or rogue ASNs) that legitimate internal corporate emails would never route through.
-
-### ✅ PHASE 9 — Threat Intelligence Integration (CTI)
-* **What We Built:** Implemented a Global Threat Intelligence feed in `threat.service.ts` to automatically cross-reference discovered IPs, domains, and URLs against known threat vectors. Updated `email.controller.ts` to coordinate this and exposed the findings in a dedicated "Global Threat Intelligence Feeds" section in the Next.js UI.
-* **Why It Matters:** Raw observables (an IP address or URL) mean nothing without context. By running observables against Cyber Threat Intelligence (CTI) databases, we instantly surface Indicators of Compromise (IOCs) such as known Phishing domains, Spam Relays, or Tor Exit Nodes, drastically reducing investigation time.
-
-### ✅ PHASE 10 — Multi-Factor Rule-Based Risk Scoring Engine
-* **What We Built:** Built `risk.service.ts` to compute an aggregated, transparent Threat Risk Score (0-100) with graded severity tiers (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`), executive summaries, and an itemized breakdown of contributing risk factors with exact point weights. Seamlessly wired it into `analysis.service.ts` and created a live Risk Gauge and Contributing Factor Matrix in `index.tsx`.
-* **Why It Matters:** SOC analysts suffer from "alert fatigue" when systems output vague black-box warnings. A transparent, multi-factor risk engine provides mathematically explainable evidence scores, enabling rapid, high-confidence quarantine and response decisions.
-
----
-
-# 1. Project Goal
-
-The platform should allow an investigator/user to upload a suspicious email, preferably as a `.eml` file.
-
-The system should analyze the email and provide intelligence such as:
-
-* Sender information
-* Recipient information
-* Subject
-* Email timestamps
-* Full email headers
-* `Received` SMTP relay chain
-* Sending IP addresses
-* Origin/relay infrastructure
-* SPF result
-* DKIM result
-* DMARC result
-* Sender/domain mismatch
-* Reply-To anomalies
-* Return-Path anomalies
-* Suspicious URLs
-* Domain information
-* Lookalike/typosquatting domains
-* IP geolocation
-* IP reputation
-* Domain reputation
-* Threat-intelligence matches
-* Phishing indicators
-* BEC/impersonation indicators
-* Suspicious language/content
-* Overall risk score
-* Explanation of why the email was considered suspicious
-* Investigation timeline
-* SMTP route visualization
-* Infrastructure relationships
-* Forensic report
-
-The platform should eventually combine:
-
-**Email Forensics + Threat Intelligence + Geolocation + NLP/AI + Risk Scoring + Graph Analysis**
-
----
-
-# 2. Important Technical Principle
-
-Do not start with AI/ML.
-
-Build the system progressively.
-
-The initial system should be:
-
-**Next.js → Express.js → PostgreSQL**
-
-Then gradually add:
-
-**Email parsing → Header analysis → SPF/DKIM/DMARC → IP analysis → URL/domain analysis → Threat Intelligence → Risk Engine → NLP → ML → Graph analysis**
-
-Python should NOT be the main backend.
-
-Use **Node.js + Express + TypeScript** for the primary backend.
-
-If Python becomes useful later for advanced NLP/ML, create it as a separate microservice that communicates with the Express backend through an API.
-
----
-
-# 3. Preferred Technology Stack
-
-## Frontend
-
-* Next.js
-* TypeScript
-* React
-* Tailwind CSS
-* Recharts or another suitable charting library
-* React Flow for infrastructure/correlation graphs
-* Leaflet or another suitable map library for geolocation
-
-## Backend
-
-* Node.js
-* Express.js
-* TypeScript
-* REST API architecture
-
-## Database
-
-* PostgreSQL
-* Prisma ORM
-
-## Email Analysis
-
-Choose appropriate Node.js libraries for:
-
-* `.eml` parsing
-* MIME parsing
-* email header parsing
-* URL extraction
-
-Explain why you select each library.
-
-## Security / Authentication
-
-Later add:
-
-* JWT/session authentication
-* role-based access
-* rate limiting
-* input validation
-* secure file upload
-* sanitization
-* audit logging
-
-## AI / ML
-
-Initially:
-
-* Rule-based detection
-* Basic NLP
-
-Later:
-
-* Python
-* scikit-learn
-* Hugging Face / Transformers
-* ML classification
-
-Do not introduce unnecessary technologies.
-
----
-
-# 4. Architecture
-
-Use this general architecture:
+## Architecture
 
 ```text
-                    ┌─────────────────────┐
-                    │      Next.js UI     │
-                    │ Dashboard / Reports │
-                    └──────────┬──────────┘
-                               │
-                               ▼
-                    ┌─────────────────────┐
-                    │   Express.js API    │
-                    │   Node.js + TS      │
-                    └──────────┬──────────┘
-                               │
-          ┌────────────────────┼────────────────────┐
-          │                    │                    │
-          ▼                    ▼                    ▼
- ┌────────────────┐   ┌────────────────┐   ┌─────────────────┐
- │ Email Forensic │   │ Threat Intel   │   │ Risk Engine     │
- │ Analysis       │   │ APIs / Sources │   │                 │
- └───────┬────────┘   └────────────────┘   └─────────────────┘
-         │
-         ▼
- ┌────────────────────┐
- │ PostgreSQL + Prisma│
- └────────────────────┘
-
-Later:
-
-Express.js
-     │
-     ▼
-Python ML/NLP Service
+Frontend (Next.js + React + Tailwind)
+        |
+        v
+Backend (Express + TypeScript)
+        |
+   +----+----+--------------------+
+   |         |                    |
+   v         v                    v
+Email      Threat & Domain       Risk & AI
+Parsing    Analysis              Scoring
+   |         |                    |
+   +----+----+--------------------+
+        |
+        v
+PostgreSQL + Prisma
 ```
 
----
-
-# 5. Development Philosophy
-
-I want you to teach me **phase by phase**.
-
-For every phase:
-
-1. Explain the cybersecurity concept first.
-2. Explain why the concept matters.
-3. Explain how it works in real-world email systems.
-4. Explain what we are going to build.
-5. Explain the architecture.
-6. Create the necessary files/folders.
-7. Write the code.
-8. Explain the important parts of the code.
-9. Tell me how to run it.
-10. Give me a small test.
-11. Tell me what output I should expect.
-12. Give me a few questions I should be able to answer before moving forward.
-
-Do not assume I understand cybersecurity terminology.
-
-Whenever you introduce something such as:
-
-* SMTP
-* MIME
-* SPF
-* DKIM
-* DMARC
-* DNS
-* MX
-* PTR
-* ASN
-* CIDR
-* WHOIS/RDAP
-* TLS
-* SMTP relay
-* IOC
-* BEC
-* phishing
-* spoofing
-* threat intelligence
-* IP reputation
-* NLP
-* embeddings
-* classification
-* confidence score
-
-explain it in simple language first.
-
----
-
-# 6. Phase-Based Development Plan
-
-Follow approximately this progression.
-
-## PHASE 0 — Cybersecurity & Email Fundamentals
-
-Teach me:
-
-* What an email actually is
-* How SMTP works
-* Mail servers
-* SMTP relay
-* DNS
-* MX records
-* Email headers
-* MIME
-* `.eml`
-* SPF
-* DKIM
-* DMARC
-* IP addresses
-* Domains
-* TLS
-
-Do not build complex code yet.
-
-Give me small practical exercises.
-
----
-
-# PHASE 1 — Create the Full-Stack Foundation
-
-Create:
+## Repository structure
 
 ```text
-project/
+ps106/
+├── backend/
+│   ├── prisma/
+│   ├── src/
+│   ├── package.json
+│   ├── tsconfig.json
+│   └── vercel.json
 ├── frontend/
-│   └── Next.js
-│
-└── backend/
-    └── Express + TypeScript
+│   ├── src/
+│   ├── public/
+│   ├── package.json
+│   ├── next.config.ts
+│   ├── eslint.config.mjs
+│   └── README.md
+├── Readme.md
+├── ppt_documentation.txt
+├── spam_test_*.eml
+└── .gitignore
 ```
 
-Configure:
+## Tech stack
 
-* Express
-* TypeScript
-* environment variables
-* Prisma
-* PostgreSQL
-* basic REST API
-* error handling
-* logging
-* CORS
-* basic project structure
+### Frontend
 
-Teach me why each part exists.
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- Leaflet for geolocation map
+- Custom risk and forensic UI cards
+
+### Backend
+
+- Node.js
+- Express.js
+- TypeScript
+- Prisma ORM
+- PostgreSQL
+- `mailparser` for `.eml` parsing
+- `multer` for upload handling
+
+## Quick start
+
+### 1) Install dependencies
+
+From the project root:
+
+```bash
+cd backend
+npm install
+
+cd ../frontend
+npm install
+```
+
+> On Windows PowerShell, use `npm.cmd` instead of `npm` if execution policy blocks scripts.
+
+### 2) Start the backend
+
+```bash
+cd backend
+npm run dev
+```
+
+The API runs on:
+
+- http://localhost:8000
+- Health check: http://localhost:8000/api/health
+
+### 3) Start the frontend
+
+```bash
+cd frontend
+npm run dev
+```
+
+The app runs on:
+
+- http://localhost:3000
+
+### 4) Build for production
+
+```bash
+cd backend
+npm run build
+
+cd ../frontend
+npm run build
+```
+
+## Environment variables
+
+Create a `.env` file in the backend folder if required by your local database setup:
+
+```env
+PORT=8000
+DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/forensic_mail"
+```
+
+The project also supports local or hosted frontend API configuration through `NEXT_PUBLIC_API_URL` in the frontend app.
+
+## Core API endpoints
+
+### Health
+
+- `GET /api/health`
+
+### Email investigation
+
+- `POST /api/emails/upload` with multipart form field `file`
+- `GET /api/emails`
+- `GET /api/emails/:id`
+- `DELETE /api/emails/:id`
+
+### Example upload flow
+
+```bash
+curl -X POST http://localhost:8000/api/emails/upload \
+  -F "file=@./spam_test_1.eml"
+```
+
+## Analysis features included
+
+- Email metadata extraction
+- Header anomaly detection
+- SPF/DKIM/DMARC extraction
+- Domain impersonation checks
+- URL risk scoring
+- SMTP route reconstruction
+- Geographic IP mapping
+- Threat intelligence correlation
+- risk evaluation with rationale
+- AI/NLP heuristic text analysis
+
+## Sample evidence files
+
+The repository includes example malicious email fixtures:
+
+- `spam_test_1.eml`
+- `spam_test_2.eml`
+- `spam_test_3.eml`
+- `spam_test_4.eml`
+- `spam_test_5_typo.eml`
+- `spam_test_6_freemail.eml`
+- `spam_test_7_urls.eml`
+- `spam_test_8_route.eml`
+
+These are useful for testing the parser, threat detection rules, and risk engine.
+
+## Security model notes
+
+- Uploaded files are limited to 5 MB in the backend to reduce memory abuse.
+- File processing is designed for investigation workflows and local assessment.
+- This project is intended for security research, internal testing, and controlled forensic review.
+
+## Future roadmap
+
+The project is planned to evolve with additional phases such as:
+
+- more advanced NLP and AI classification
+- safer authentication and RBAC
+- campaign correlation across multiple emails
+- stronger investigation case management
+- deeper export/reporting workflows
+
+## License
+
+This project is for educational and forensic analysis use within a controlled environment.
 
 ---
 
-# PHASE 2 — Email Upload & Parsing
-
-Allow the user to upload a `.eml` file.
-
-The backend should:
-
-1. Receive the file.
-2. Validate it.
-3. Parse it.
-4. Extract:
-
-   * From
-   * To
-   * CC
-   * Subject
-   * Date
-   * Reply-To
-   * Return-Path
-   * Message-ID
-   * MIME information
-   * Text body
-   * HTML body
-   * Attachments
-   * Headers
-   * Received headers
-
-Store the necessary normalized information in PostgreSQL.
-
-Explain MIME and email parsing before implementing it.
-
----
-
-# PHASE 3 — Email Header Forensics
-
-Build a proper header analysis engine.
-
-Analyze:
-
-* From
-* Sender
-* Reply-To
-* Return-Path
-* Message-ID
-* Date
+For a more implementation-focused view of the frontend, see [frontend/README.md](frontend/README.md).
 * Received
 * Authentication-Results
 * X-Originating-IP
