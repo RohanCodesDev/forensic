@@ -1,9 +1,12 @@
+import { NlpAnalysis } from './nlp.service';
+
 export interface RiskFactor {
   name: string;
   points: number;
   description: string;
   severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 }
+
 
 export interface RiskEvaluation {
   score: number; // 0 to 100
@@ -37,7 +40,8 @@ export const calculateRiskScore = (
   urlAnalysis: any[],
   routeAnalysis: any,
   threatIntel: any[],
-  attachments: any[]
+  attachments: any[],
+  nlpAnalysis?: NlpAnalysis
 ): RiskEvaluation => {
   const factors: RiskFactor[] = [];
 
@@ -180,6 +184,33 @@ export const calculateRiskScore = (
       description: `Contains ${riskyAtts.length} potentially dangerous attachment(s) with executable/script extensions (${riskyAtts.map((a: any) => a.filename).join(', ')}).`,
       severity: 'CRITICAL',
     });
+  }
+
+  // 11. NLP Social Engineering Intent Score
+  if (nlpAnalysis && nlpAnalysis.intentScore > 0) {
+    const { intentScore, intentLevel, becCategory, triggers } = nlpAnalysis;
+    if (intentLevel === 'CRITICAL') {
+      factors.push({
+        name: 'CRITICAL Social Engineering Intent',
+        points: 30,
+        description: `NLP engine detected critical manipulation patterns (intent score: ${intentScore}/100). ${becCategory ? `Dominant attack category: ${becCategory}.` : ''} ${triggers.length} trigger phrase(s) matched.`,
+        severity: 'CRITICAL',
+      });
+    } else if (intentLevel === 'HIGH') {
+      factors.push({
+        name: 'High-Risk Social Engineering Language',
+        points: 20,
+        description: `NLP engine detected high-risk psychological coercion patterns (intent score: ${intentScore}/100). ${becCategory ? `Attack pattern: ${becCategory}.` : ''} ${triggers.length} trigger phrase(s) matched.`,
+        severity: 'HIGH',
+      });
+    } else if (intentLevel === 'MEDIUM') {
+      factors.push({
+        name: 'Suspicious Manipulation Language',
+        points: 10,
+        description: `NLP engine found moderate social engineering signals (intent score: ${intentScore}/100). ${triggers.length} trigger phrase(s) flagged for review.`,
+        severity: 'MEDIUM',
+      });
+    }
   }
 
   // Calculate Raw Total and Cap at 100

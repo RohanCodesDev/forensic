@@ -45,6 +45,7 @@ model AnalysisReport {
   routeAnalysis   Json?    // Hop chain, delays, originating IP, geo
   threatIntel     Json?    // IOC hits across AbuseIPDB, URLhaus, etc.
   attachments     Json?    // Attachment metadata and risk flags
+  nlpAnalysis     Json?    // NLP social engineering & BEC heuristic results
   createdAt       DateTime @default(now())
 }
 

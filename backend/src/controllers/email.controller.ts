@@ -119,6 +119,7 @@ export const uploadEmail = async (req: Request, res: Response): Promise<void> =>
             routeAnalysis: (analysisResult.routeAnalysis || {}) as any,
             threatIntel: (analysisResult.threatIntel || []) as any,
             attachments: (attachments || []) as any,
+            nlpAnalysis: (analysisResult.nlpAnalysis || {}) as any,
           }
         }
       },
@@ -202,7 +203,8 @@ export const getEmailById = async (req: Request, res: Response): Promise<void> =
       domainAnalysis: report.domainAnalysis,
       urlAnalysis: report.urlAnalysis || [],
       routeAnalysis: report.routeAnalysis,
-      threatIntel: report.threatIntel || []
+      threatIntel: report.threatIntel || [],
+      nlpAnalysis: report.nlpAnalysis || null
     } : null;
 
     res.json({

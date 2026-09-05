@@ -14,6 +14,7 @@ import ThreatIntelCard from "../components/ThreatIntelCard";
 import SmtpRouteCard from "../components/SmtpRouteCard";
 import AnomaliesAlert from "../components/AnomaliesAlert";
 import BadgeModal from "../components/BadgeModal";
+import NlpAnalysisCard from "../components/NlpAnalysisCard";
 import { EmailEvidence, InvestigationSummary, BadgeInfo } from "../types/forensic";
 
 const lexend = Lexend({ subsets: ["latin"] });
@@ -187,6 +188,11 @@ export default function Home() {
             {/* Phase 10: Multi-Factor Risk Score Engine */}
             {result.analysis?.riskEvaluation && (
               <RiskScoreGauge riskEvaluation={result.analysis.riskEvaluation} />
+            )}
+
+            {/* Phase 11: NLP Social Engineering & BEC Heuristics */}
+            {result.analysis?.nlpAnalysis && (
+              <NlpAnalysisCard nlpAnalysis={result.analysis.nlpAnalysis} />
             )}
 
             {/* Extracted Payload Headers & Decrypted Body */}

@@ -3,10 +3,11 @@ import { analyzeUrls } from './url.service';
 import { analyzeSmtpRoute } from './route.service';
 import { analyzeThreats } from './threat.service';
 import { calculateRiskScore } from './risk.service';
+import { analyzeNlp } from './nlp.service';
 
 /**
  * Master Orchestrator for all Forensic Analysis Services
- * It takes parsed email data and routes it through all specialized engines (Domain, URL, Route, CTI),
+ * It takes parsed email data and routes it through all specialized engines (Domain, URL, Route, CTI, NLP),
  * compiles the results, and calculates the final Multi-Factor Risk Score and Threat Level.
  */
 export const runFullAnalysis = async (emailData: any, parsed: any, attachments: any[]) => {
@@ -98,6 +99,15 @@ export const runFullAnalysis = async (emailData: any, parsed: any, attachments: 
     anomalies.push(`THREAT INTEL ALERT: Found ${maliciousThreats.length} indicator(s) of compromise (IOCs) across IPs/Domains/URLs.`);
   }
 
+  // PHASE 11: NLP & Social Engineering / BEC Heuristics Engine
+  const textBody = parsed.text || '';
+  const htmlBody = parsed.html || parsed.textAsHtml || '';
+  const nlpAnalysis = analyzeNlp(textBody, htmlBody, emailData.subject || '');
+
+  if (nlpAnalysis.intentScore >= 40) {
+    anomalies.push(`SOCIAL ENGINEERING DETECTED: NLP intent score ${nlpAnalysis.intentScore}/100 (${nlpAnalysis.intentLevel}). ${nlpAnalysis.becCategory ? `Dominant attack pattern: ${nlpAnalysis.becCategory}.` : ''} Found ${nlpAnalysis.triggers.length} psychological manipulation trigger(s) in email body.`);
+  }
+
   // PHASE 10: Multi-Factor Rule-Based Risk Engine Evaluation
   const riskEvaluation = calculateRiskScore(
     emailData,
@@ -105,7 +115,8 @@ export const runFullAnalysis = async (emailData: any, parsed: any, attachments: 
     urlAnalysis,
     routeAnalysis,
     threatIntel,
-    attachments
+    attachments,
+    nlpAnalysis
   );
 
   // Maintain backward compatibility for threatLevel string
@@ -119,6 +130,7 @@ export const runFullAnalysis = async (emailData: any, parsed: any, attachments: 
     domainAnalysis,
     urlAnalysis,
     routeAnalysis,
-    threatIntel
+    threatIntel,
+    nlpAnalysis
   };
 };

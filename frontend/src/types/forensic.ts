@@ -79,6 +79,21 @@ export interface AttachmentPayload {
   sha256?: string | null;
 }
 
+export interface NlpTrigger {
+  category: string;
+  phrase: string;
+  context: string;
+  weight: number;
+}
+
+export interface NlpAnalysis {
+  intentScore: number;
+  intentLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  becCategory: string | null;
+  triggers: NlpTrigger[];
+  summary: string;
+}
+
 export interface RiskFactor {
   name: string;
   points: number;
@@ -102,6 +117,7 @@ export interface FullAnalysisResult {
   urlAnalysis: UrlAnalysisResult[];
   routeAnalysis: RouteAnalysis | null;
   threatIntel: ThreatIndicator[];
+  nlpAnalysis?: NlpAnalysis | null;
 }
 
 export interface EmailEvidence {
