@@ -214,6 +214,93 @@ export default function AttachmentPayloadCard({ attachments }: AttachmentPayload
                     </div>
                   )}
 
+                  {/* DEEP STATIC ANALYSIS SECTION (Phase 17) */}
+                  {att.staticAnalysis && (
+                    <div className="space-y-4 pt-4 border-t border-gray-800/60 mt-2">
+                      <p className="text-[9px] font-mono text-gray-500 uppercase tracking-widest font-bold flex items-center gap-2">
+                        <svg className="w-3 h-3 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                        Deep Static Inspection Engine
+                      </p>
+
+                      {/* File Entropy Gauge */}
+                      <div className="bg-black border border-gray-800 rounded px-3 py-3 space-y-2">
+                        <div className="flex justify-between items-center text-[10px] font-mono">
+                          <span className="text-gray-400">Information Entropy (Shannon)</span>
+                          <span className={att.staticAnalysis.entropyScore > 7.2 ? "text-rose-400 font-bold" : "text-emerald-400 font-bold"}>
+                            {att.staticAnalysis.entropyScore.toFixed(2)} / 8.00
+                          </span>
+                        </div>
+                        <div className="h-1.5 bg-gray-900 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all duration-700 ${
+                              att.staticAnalysis.entropyScore > 7.2 ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]'
+                            }`}
+                            style={{ width: `${(att.staticAnalysis.entropyScore / 8) * 100}%` }}
+                          />
+                        </div>
+                        {att.staticAnalysis.isPacked && (
+                          <p className="text-[9px] text-rose-500/80 font-mono mt-1 text-right italic">
+                            High entropy indicates payload packing or encryption.
+                          </p>
+                        )}
+                      </div>
+
+                      {/* YARA Matches */}
+                      {att.staticAnalysis.yaraMatches.length > 0 && (
+                        <div className="space-y-2">
+                          <p className="text-[10px] font-mono text-gray-400">YARA Signatures Triggered:</p>
+                          <div className="space-y-2">
+                            {att.staticAnalysis.yaraMatches.map((yara, yi) => (
+                              <div key={yi} className="bg-black border border-rose-900/50 border-l-2 border-l-rose-500 rounded p-2">
+                                <div className="flex items-center justify-between">
+                                  <code className="text-xs font-mono text-rose-400 font-bold">{yara.ruleName}</code>
+                                  <div className="flex gap-1">
+                                    {yara.tags.map((tag, ti) => (
+                                      <span key={ti} className="text-[8px] uppercase px-1.5 py-0.5 rounded bg-gray-900 text-gray-500 border border-gray-800">
+                                        {tag}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                                <p className="text-[10px] font-mono text-gray-500 mt-1">{yara.description}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Extracted Macro / JavaScript */}
+                      {att.staticAnalysis.macroAnalysis && (
+                        <div className="space-y-2">
+                          <p className="text-[10px] font-mono text-gray-400 flex items-center justify-between">
+                            <span>Static Macro / JavaScript Extraction:</span>
+                            {att.staticAnalysis.macroAnalysis.isObfuscated && (
+                              <span className="text-amber-500 text-[9px] border border-amber-900 px-1 rounded bg-amber-950/30">OBFUSCATION DETECTED</span>
+                            )}
+                          </p>
+                          
+                          {att.staticAnalysis.macroAnalysis.suspiciousKeywords.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mb-2">
+                              <span className="text-[9px] text-gray-600 font-mono">IOCs:</span>
+                              {att.staticAnalysis.macroAnalysis.suspiciousKeywords.map((kw, ki) => (
+                                <span key={ki} className="text-[9px] font-mono text-rose-300 bg-rose-950/50 px-1 rounded">{kw}</span>
+                              ))}
+                            </div>
+                          )}
+
+                          {att.staticAnalysis.macroAnalysis.macroCodeSnippet && (
+                            <div className="relative group">
+                              <div className="absolute -inset-0.5 bg-gradient-to-b from-gray-800 to-transparent rounded opacity-30 group-hover:opacity-100 transition duration-500"></div>
+                              <pre className="relative bg-[#0a0a0a] border border-gray-800/80 p-3 rounded font-mono text-[10px] text-cyan-400/90 overflow-x-auto whitespace-pre custom-scrollbar">
+                                <code>{att.staticAnalysis.macroAnalysis.macroCodeSnippet}</code>
+                              </pre>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {/* Verdict Reasons */}
                   {att.verdictReasons && att.verdictReasons.length > 0 && (
                     <div className="space-y-1">

@@ -28,6 +28,9 @@ model Email {
   dmarcResult     String?         @default("UNKNOWN")
   createdAt       DateTime        @default(now())
   analysisReport  AnalysisReport?
+  caseId          String?
+  case            Case?           @relation(fields: [caseId], references: [id], onDelete: SetNull)
+  auditLogs       AuditLog[]
 }
 
 model AnalysisReport {
@@ -48,5 +51,29 @@ model AnalysisReport {
   nlpAnalysis     Json?    // NLP social engineering & BEC heuristic results
   aiAnalysis      Json?    // True LLM (Groq) semantic analysis
   createdAt       DateTime @default(now())
+}
+
+model Case {
+  id          String     @id @default(uuid())
+  name        String
+  description String?
+  status      String     @default("OPEN") // OPEN, CLOSED, ESCALATED
+  priority    String     @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  emails      Email[]
+  auditLogs   AuditLog[]
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  caseId      String?
+  case        Case?    @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  emailId     String?
+  email       Email?   @relation(fields: [emailId], references: [id], onDelete: Cascade)
+  action      String   // e.g., CASE_CREATED, EVIDENCE_ADDED
+  performedBy String   @default("SYSTEM")
+  timestamp   DateTime @default(now())
+  details     Json?    // Stores old/new values or hashes
 }
 

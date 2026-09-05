@@ -89,6 +89,27 @@ export interface AttachmentPayload {
   threatScore?: number;
   verdict?: 'CLEAN' | 'SUSPICIOUS' | 'MALICIOUS';
   verdictReasons?: string[];
+  staticAnalysis?: StaticAnalysisResult;
+}
+
+export interface YaraMatch {
+  ruleName: string;
+  description: string;
+  tags: string[];
+}
+
+export interface MacroAnalysis {
+  hasMacros: boolean;
+  macroCodeSnippet?: string;
+  isObfuscated: boolean;
+  suspiciousKeywords: string[];
+}
+
+export interface StaticAnalysisResult {
+  entropyScore: number;
+  isPacked: boolean;
+  yaraMatches: YaraMatch[];
+  macroAnalysis?: MacroAnalysis;
 }
 
 export interface NlpTrigger {
@@ -243,5 +264,34 @@ export interface CampaignCorrelationResult {
     domains: { value: string; count: number }[];
     urls: { value: string; count: number }[];
   };
+}
+
+export interface AuditLog {
+  id: string;
+  caseId: string | null;
+  emailId: string | null;
+  action: string;
+  performedBy: string;
+  timestamp: string;
+  details: any;
+  email?: {
+    filename: string;
+    sha256Hash: string | null;
+  } | null;
+}
+
+export interface ForensicCase {
+  id: string;
+  name: string;
+  description: string | null;
+  status: string;
+  priority: string;
+  createdAt: string;
+  updatedAt: string;
+  _count?: {
+    emails: number;
+  };
+  emails?: EmailEvidence[];
+  auditLogs?: AuditLog[];
 }
 

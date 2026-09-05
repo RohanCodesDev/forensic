@@ -20,12 +20,13 @@ import NlpAnalysisCard from "../components/NlpAnalysisCard";
 import AiAnalystCard from "../components/AiAnalystCard";
 import ThreatGraphCard from "../components/ThreatGraphCard";
 import GeoRouteMap from "../components/GeoRouteMap";
+import CaseManagement from "../components/CaseManagement";
 import { EmailEvidence, InvestigationSummary, BadgeInfo, CampaignCorrelationResult } from "../types/forensic";
 
-const lexend = Lexend({ subsets: ["latin"] });
+const lexend = Lexend({ subsets: ["latin"], variable: "--font-lexend" });
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<"ingest" | "vault" | "campaigns">("ingest");
+  const [activeTab, setActiveTab] = useState<"ingest" | "vault" | "campaigns" | "cases">("ingest");
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -170,13 +171,13 @@ export default function Home() {
   };
 
   return (
-    <div className={`min-h-screen bg-black text-gray-300 p-4 sm:p-6 md:p-8 ${lexend.className} selection:bg-green-500 selection:text-black`}>
+    <div className={`min-h-screen bg-[#030304] text-gray-300 ${lexend.variable} font-[family-name:var(--font-lexend)] selection:bg-emerald-500/30 selection:text-emerald-100`}>
       <Head>
         <title>Forensic Mail | AI & Threat Intelligence Suite</title>
         <meta name="description" content="AI-Powered Email Threat Detection, Geolocation and Forensic Intelligence Platform" />
       </Head>
 
-      <main className="max-w-7xl mx-auto space-y-6 md:space-y-8 pt-4 md:pt-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pb-16 space-y-5 md:space-y-6 pt-6 md:pt-8">
         <Header
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -202,6 +203,7 @@ export default function Home() {
             onDeleteCase={handleDeleteCase}
             onRefresh={refreshAllData}
             currentActiveId={result?.id}
+            apiUrl={getApiUrl()}
           />
         )}
 
@@ -214,37 +216,41 @@ export default function Home() {
           />
         )}
 
+        {activeTab === "cases" && (
+          <CaseManagement
+            apiUrl={getApiUrl()}
+          />
+        )}
+
+
         {/* ACTIVE INVESTIGATION REPORT VIEW */}
         {result && (
-          <div className="flex flex-col lg:flex-row gap-6 items-start">
-            
+          <div className="flex flex-col lg:flex-row gap-5 items-start">
+
             {/* Sticky Navigation Sidebar */}
-            <aside className="hidden lg:block sticky top-8 w-60 shrink-0 space-y-1.5 border border-zinc-800 bg-zinc-950 p-3 rounded">
-              <div className="font-mono text-[10px] uppercase text-zinc-500 font-bold px-2 py-1 border-b border-zinc-900 mb-2">
-                [ REPORT TELEMETRY INDEX ]
+            <aside className="hidden lg:block sticky top-8 w-56 shrink-0 border border-zinc-800/80 bg-zinc-950 rounded-xl p-3 space-y-0.5">
+              <div className="font-mono text-[9px] uppercase text-zinc-600 font-bold px-2.5 py-1.5 border-b border-zinc-800/60 mb-2 tracking-widest">
+                Report Telemetry Index
               </div>
               {[
-                { id: "section-risk", label: "[01] RISK ENGINE" },
-                { id: "section-ai", label: "[02] NEURAL ANALYST" },
-                { id: "section-nlp", label: "[03] NLP HEURISTICS" },
-                { id: "section-payload", label: "[04] RAW PAYLOAD" },
-                { id: "section-attachments", label: "[05] ATTACHMENTS" },
-                { id: "section-auth", label: "[06] AUTH AUDIT" },
-                { id: "section-domain", label: "[07] DOMAIN INTEL" },
-                { id: "section-graph", label: "[08] THREAT GRAPH" },
-                { id: "section-threat", label: "[09] CTI FEEDS" },
-                { id: "section-url", label: "[10] URL ANALYSIS" },
-                { id: "section-route", label: "[11] SMTP ROUTING" }
-              ].map(sec => (
-                <button 
+                { id: "section-risk", label: "[01] Risk Engine" },
+                { id: "section-ai", label: "[02] Neural Analyst" },
+                { id: "section-nlp", label: "[03] NLP Heuristics" },
+                { id: "section-payload", label: "[04] Raw Payload" },
+                { id: "section-attachments", label: "[05] Attachments" },
+                { id: "section-auth", label: "[06] Auth Audit" },
+                { id: "section-domain", label: "[07] Domain Intel" },
+                { id: "section-graph", label: "[08] Threat Graph" },
+                { id: "section-threat", label: "[09] CTI Feeds" },
+                { id: "section-url", label: "[10] URL Analysis" },
+                { id: "section-route", label: "[11] SMTP Routing" },
+              ].map((sec) => (
+                <button
                   key={sec.id}
                   onClick={() => {
-                    const el = document.getElementById(sec.id);
-                    if (el) {
-                      el.scrollIntoView({ behavior: "smooth", block: "start" });
-                    }
+                    document.getElementById(sec.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
                   }}
-                  className="w-full text-left block text-xs font-mono text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900 px-2.5 py-1.5 rounded transition-colors"
+                  className="w-full text-left font-mono text-[11px] text-zinc-500 hover:text-zinc-100 hover:bg-zinc-900 px-2.5 py-1.5 rounded-md transition-colors"
                 >
                   {sec.label}
                 </button>
@@ -252,37 +258,40 @@ export default function Home() {
             </aside>
 
             {/* Main Report Content */}
-            <section ref={reportRef} className="flex-1 min-w-0 bg-zinc-950 p-4 sm:p-6 border border-zinc-800 rounded space-y-5 print:p-0 print:border-none">
-            
-            {/* Header with quick close / case info */}
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-3 print:border-b-2 print:border-gray-600 print:mb-8">
-              <div className="flex items-center gap-2 font-mono">
-                <span className="w-1.5 h-1.5 bg-emerald-400"></span>
-                <span className="text-xs font-bold uppercase tracking-wider text-zinc-200">
-                  EVIDENCE DOSSIER: {result.filename}
-                </span>
-                {result.sha256Hash && (
-                  <span className="text-[10px] text-zinc-500 hidden sm:inline">
-                    [{result.sha256Hash.substring(0, 12)}...]
+            <section ref={reportRef} className="flex-1 min-w-0 bg-zinc-950 border border-zinc-800/80 rounded-xl p-5 sm:p-6 space-y-5 print:p-0 print:border-none">
+
+              {/* Report Dossier Header */}
+              <div className="flex items-center justify-between border-b border-zinc-800/60 pb-4 print:border-b-2 print:border-gray-600 print:mb-8">
+                <div className="flex items-center gap-2.5 font-mono min-w-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                  <span className="text-xs font-bold uppercase tracking-widest text-zinc-200 truncate">
+                    Evidence Dossier: {result.filename}
                   </span>
-                )}
+                  {result.sha256Hash && (
+                    <span className="text-[10px] text-zinc-600 hidden sm:inline tabular-nums">
+                      [{result.sha256Hash.substring(0, 12)}...]
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2 print-hidden font-mono text-[11px] shrink-0 ml-3">
+                  <button
+                    onClick={() => handlePrint()}
+                    className="px-2.5 py-1.5 bg-zinc-900 border border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-white rounded-md transition-all flex items-center gap-1.5"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                    Export PDF
+                  </button>
+                  <button
+                    onClick={() => setResult(null)}
+                    className="px-2.5 py-1.5 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-500 hover:text-zinc-300 rounded-md transition-all"
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-2 print-hidden font-mono text-xs">
-                <button
-                  onClick={() => handlePrint()}
-                  className="px-2.5 py-1 bg-zinc-900 border border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-white rounded transition-colors flex items-center gap-1.5"
-                >
-                  <svg className="w-3 h-3 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
-                  [ EXPORT PDF ]
-                </button>
-                <button
-                  onClick={() => setResult(null)}
-                  className="px-2.5 py-1 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-500 hover:text-zinc-300 rounded transition-colors"
-                >
-                  [ CLOSE ]
-                </button>
-              </div>
-            </div>
 
             {/* Print Only Meta Header */}
             <div className="hidden print:block mb-8 pb-4 border-b border-gray-800 space-y-2">

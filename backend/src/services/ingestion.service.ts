@@ -69,7 +69,8 @@ export const parseRawEmail = async (buffer: Buffer): Promise<IngestionResult> =>
       contentType: att.contentType,
       size: att.size,
       isRisky,
-      sha256: attHash
+      sha256: attHash,
+      content: att.content
     };
   });
 

@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import healthRoutes from './routes/health.routes';
 import emailRoutes from './routes/email.routes';
 import campaignRoutes from './routes/campaign.routes';
+import caseRoutes from './routes/case.routes';
 import { globalErrorHandler } from './middleware/errorHandler';
 
 dotenv.config();
@@ -22,6 +23,7 @@ app.get('/', (req, res) => {
 app.use('/api', healthRoutes);
 app.use('/api/emails', emailRoutes);
 app.use('/api/campaigns', campaignRoutes);
+app.use('/api/cases', caseRoutes);
 
 // Apply Global Error Handler (must be the last middleware)
 app.use(globalErrorHandler);
