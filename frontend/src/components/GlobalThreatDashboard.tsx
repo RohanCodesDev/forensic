@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
+import InfoTooltip from './InfoTooltip';
 
 // Next.js requires dynamic import with ssr: false for react-globe.gl because it uses the window object
 const Globe = dynamic(() => import('react-globe.gl'), { ssr: false });
@@ -67,9 +68,15 @@ export default function GlobalThreatDashboard({ apiUrl }: GlobalThreatDashboardP
       
       {/* HUD Overlays */}
       <div className="absolute top-6 left-6 z-10 pointer-events-none">
-        <h2 className="text-xl font-bold text-zinc-100 uppercase tracking-widest flex items-center gap-3">
+        <h2 className="text-xl font-bold text-zinc-100 uppercase tracking-widest flex items-center gap-3 pointer-events-auto">
           <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
           Live Threat Intel Globe
+          <InfoTooltip
+            title="Live Threat Intel Globe"
+            explanation="A 3D interactive holographic globe displaying geographical source locations and transmission pathways of detected email attacks around the world."
+            align="left"
+            position="bottom"
+          />
         </h2>
         <p className="text-xs text-zinc-500 font-mono mt-1 uppercase tracking-wider">
           Tracking {locations.length} adversarial nodes & {arcs.length} attack vectors

@@ -1,5 +1,6 @@
 import React from "react";
 import { DomainAnalysis } from "../types/forensic";
+import InfoTooltip from "./InfoTooltip";
 
 interface DomainForensicsCardProps {
   domainAnalysis: DomainAnalysis | null;
@@ -15,6 +16,10 @@ export default function DomainForensicsCard({ domainAnalysis }: DomainForensicsC
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
         </svg>
         Domain Forensics & Brand Impersonation
+        <InfoTooltip
+          title="Domain Forensics & Impersonation"
+          explanation="Scans the sender's domain name to detect typosquatting (lookalike domain names like paypa1.com or micr0soft.com) and disposable freemail addresses pretending to be legitimate corporate entities."
+        />
       </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

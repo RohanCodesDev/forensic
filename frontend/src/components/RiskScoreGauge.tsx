@@ -1,5 +1,6 @@
 import React from "react";
 import { RiskEvaluation } from "../types/forensic";
+import InfoTooltip from "./InfoTooltip";
 
 interface RiskScoreGaugeProps {
   riskEvaluation: RiskEvaluation;
@@ -56,6 +57,10 @@ export default function RiskScoreGauge({ riskEvaluation }: RiskScoreGaugeProps) 
               <span className="text-xs uppercase tracking-widest text-gray-400 font-semibold font-mono">
                 AI MULTI-FACTOR RISK ENGINE
               </span>
+              <InfoTooltip
+                title="AI Multi-Factor Risk Engine"
+                explanation="Calculates an overall danger score (0-100) combining sender identity checks, suspicious attachments, deceptive hyperlinks, domain reputation, and social-engineering language."
+              />
               <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border uppercase ${style.badge}`}>
                 {severity} SEVERITY
               </span>

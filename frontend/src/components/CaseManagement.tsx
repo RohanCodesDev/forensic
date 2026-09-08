@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ForensicCase, AuditLog } from "../types/forensic";
+import InfoTooltip from "./InfoTooltip";
 
 interface CaseManagementProps {
   apiUrl: string;
@@ -184,6 +185,10 @@ export default function CaseManagement({ apiUrl }: CaseManagementProps) {
         <h2 className="text-sm font-mono text-amber-500 font-bold uppercase tracking-wider flex items-center gap-2">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
           [ INCIDENT CASE VAULT ]
+          <InfoTooltip
+            title="Incident Case Vault"
+            explanation="Forensic incident management workspace to group related suspicious emails into formal cases, maintain cryptographic chain of custody, and track audit trails."
+          />
         </h2>
         <button
           onClick={() => setIsCreating(!isCreating)}

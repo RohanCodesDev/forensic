@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import InfoTooltip from "./InfoTooltip";
 
 interface GeoLocation {
   ip: string;
@@ -176,7 +177,25 @@ export default function GeoRouteMap({ hops }: GeoRouteMapProps) {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 bg-black border border-gray-800 p-4 md:p-6 rounded-lg">
+      <div className="flex items-center justify-between border-b border-gray-800 pb-2">
+        <div className="flex items-center gap-2">
+          <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span className="text-xs font-bold text-gray-300 font-mono uppercase tracking-wider">
+            Geographical Route Map
+          </span>
+          <InfoTooltip
+            title="Geographical Route Map"
+            explanation="Visualizes the physical global relay path this email traveled, showing where the sending server was located and which data centers routed it across countries."
+          />
+        </div>
+        <span className="text-[10px] font-mono text-gray-500">
+          {validGeoCount} Geo-Located Hops
+        </span>
+      </div>
+
       {/* Leaflet CSS Link */}
       <link
         rel="stylesheet"

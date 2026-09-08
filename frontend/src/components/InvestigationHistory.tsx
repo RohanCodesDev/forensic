@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { InvestigationSummary, ForensicCase } from "../types/forensic";
+import InfoTooltip from "./InfoTooltip";
 
 interface InvestigationHistoryProps {
   investigations: InvestigationSummary[];
@@ -75,9 +76,13 @@ export default function InvestigationHistory({
         <div className="space-y-1">
           <div className="flex items-center gap-2.5">
             <span className="w-1.5 h-1.5 rounded-full bg-sky-400 shadow-[0_0_6px_rgba(56,189,248,0.6)]" />
-            <h2 className="font-bold text-zinc-100 text-xs sm:text-sm uppercase tracking-widest">
+            <h2 className="font-bold text-zinc-100 text-xs sm:text-sm uppercase tracking-widest flex items-center gap-2">
               Forensic Case Archive
-              <span className="text-zinc-600 font-normal ml-2">// PostgreSQL Database</span>
+              <InfoTooltip
+                title="Forensic Case Archive"
+                explanation="Secure, tamper-evident evidence vault preserving original raw emails, calculated cryptographic SHA-256 fingerprints, and immutable forensic audit trails in PostgreSQL."
+              />
+              <span className="text-zinc-600 font-normal ml-1">// PostgreSQL Database</span>
             </h2>
           </div>
           <p className="text-[11px] text-zinc-500 pl-4">

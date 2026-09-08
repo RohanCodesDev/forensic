@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { FullAnalysisResult, EmailEvidence } from "../types/forensic";
 import { buildThreatGraph, GraphData } from "../utils/graphBuilder";
+import InfoTooltip from "./InfoTooltip";
 
 // Dynamically import ForceGraph2D to prevent SSR canvas issues in Next.js
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), {
@@ -64,6 +65,10 @@ export default function ThreatGraphCard({ evidence }: ThreatGraphCardProps) {
           <h3 className="font-mono text-sm tracking-widest text-gray-300 font-bold uppercase flex items-center gap-2">
             <svg className="text-indigo-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
             Infrastructure Relationship Graph
+            <InfoTooltip
+              title="Infrastructure Relationship Graph"
+              explanation="Interactive visual network displaying how the sender, server IPs, links, and file hashes in this email connect with known cyberthreat infrastructure."
+            />
           </h3>
           <p className="text-xs text-gray-500 font-mono mt-1">Interactive visual map of linked IPs, Domains, URLs, and File Hashes</p>
         </div>

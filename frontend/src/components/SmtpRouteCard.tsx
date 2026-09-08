@@ -1,6 +1,7 @@
 import React from "react";
 import dynamic from "next/dynamic";
 import { RouteAnalysis, BadgeInfo } from "../types/forensic";
+import InfoTooltip from "./InfoTooltip";
 
 const GeoRouteMap = dynamic(() => import("./GeoRouteMap"), { ssr: false });
 
@@ -26,6 +27,10 @@ export default function SmtpRouteCard({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
             SMTP Relay Hop Chain & Global Route Map
+            <InfoTooltip
+              title="SMTP Relay Hop Chain"
+              explanation="Unwraps the chronological chain of email servers (hops) that transferred this message. Pinpoints the initial originating computer, calculates transit delays, and flags suspicious intermediate proxies."
+            />
           </h3>
           <p className="text-[10px] md:text-xs text-gray-500 font-mono mt-1">
             Chronological MTA relay hops & geographic infrastructure route

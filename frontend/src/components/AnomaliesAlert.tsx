@@ -1,4 +1,5 @@
 import React from "react";
+import InfoTooltip from "./InfoTooltip";
 
 interface AnomaliesAlertProps {
   anomalies: string[];
@@ -14,6 +15,10 @@ export default function AnomaliesAlert({ anomalies }: AnomaliesAlertProps) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
         </svg>
         Security Anomalies & Threats Detected ({anomalies.length})
+        <InfoTooltip
+          title="Security Anomalies"
+          explanation="A prioritized summary of all red flags, authentication discrepancies, dangerous link redirects, and suspicious email behaviors uncovered during the automated scan."
+        />
       </h3>
       <ul className="space-y-2.5">
         {anomalies.map((anomaly, index) => (

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import Head from "next/head";
-import { Lexend } from "next/font/google";
 import { useReactToPrint } from "react-to-print";
 import Header from "../components/Header";
 import EvidenceIngestion from "../components/EvidenceIngestion";
@@ -24,8 +23,6 @@ import CaseManagement from "../components/CaseManagement";
 import GlobalThreatDashboard from "../components/GlobalThreatDashboard";
 import { EmailEvidence, InvestigationSummary, BadgeInfo, CampaignCorrelationResult } from "../types/forensic";
 
-const lexend = Lexend({ subsets: ["latin"], variable: "--font-lexend" });
-
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"ingest" | "vault" | "campaigns" | "cases" | "globe">("ingest");
   const [file, setFile] = useState<File | null>(null);
@@ -38,6 +35,56 @@ export default function Home() {
   const [campaignLoading, setCampaignLoading] = useState<boolean>(false);
   const [selectedBadge, setSelectedBadge] = useState<BadgeInfo | null>(null);
   const [autoScanResults, setAutoScanResults] = useState<any[]>([]);
+  const [activeSectionId, setActiveSectionId] = useState<string>("section-risk");
+
+  // Documentation-style ScrollSpy to highlight active section in sidebar index
+  useEffect(() => {
+    if (!result) return;
+
+    const sectionIds = [
+      "section-risk",
+      "section-ai",
+      "section-nlp",
+      "section-payload",
+      "section-attachments",
+      "section-auth",
+      "section-domain",
+      "section-geo",
+      "section-graph",
+      "section-threat",
+      "section-url",
+      "section-route",
+      "section-anomalies",
+    ];
+
+    const handleScroll = () => {
+      const scrollPos = window.scrollY + 130;
+      for (let i = sectionIds.length - 1; i >= 0; i--) {
+        const id = sectionIds[i];
+        const el = document.getElementById(id);
+        if (el) {
+          const top = el.offsetTop;
+          if (scrollPos >= top) {
+            setActiveSectionId(id);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [result]);
+
+  const scrollToSection = (id: string) => {
+    setActiveSectionId(id);
+    const element = document.getElementById(id);
+    if (element) {
+      const y = element.getBoundingClientRect().top + window.pageYOffset - 85;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  };
 
   // Phase 15: Print / Export PDF Ref
   const reportRef = useRef<HTMLElement>(null);
@@ -173,20 +220,21 @@ export default function Home() {
   };
 
   return (
-    <div className={`min-h-screen bg-[#030304] text-gray-300 ${lexend.variable} font-[family-name:var(--font-lexend)] selection:bg-emerald-500/20 selection:text-emerald-100`}>
+    <div className="min-h-screen bg-[#030304] text-gray-300 font-[family-name:var(--font-lexend)] selection:bg-emerald-500/20 selection:text-emerald-100">
       <Head>
         <title>Forensic Mail | AI & Threat Intelligence Suite</title>
         <meta name="description" content="AI-Powered Email Threat Detection, Geolocation and Forensic Intelligence Platform" />
       </Head>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pb-20 space-y-6 md:space-y-8 pt-7 md:pt-10">
-        <Header
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          vaultCount={investigations.length}
-          campaignCount={campaignData?.totalCampaignsDetected || 0}
-        />
+      {/* Sticky SaaS Navbar */}
+      <Header
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        vaultCount={investigations.length}
+        campaignCount={campaignData?.totalCampaignsDetected || 0}
+      />
 
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pb-20 space-y-6 md:space-y-8 pt-6 sm:pt-8">
         {activeTab === "ingest" && (
           <div className="space-y-6">
             <EvidenceIngestion
@@ -194,6 +242,11 @@ export default function Home() {
               status={status}
               loading={loading}
               onFileChange={handleFileChange}
+              onClearFile={() => {
+                setFile(null);
+                setResult(null);
+                setStatus("");
+              }}
               onUpload={handleUpload}
               onAutoScanComplete={(results) => {
                 setAutoScanResults(results);
@@ -313,35 +366,59 @@ export default function Home() {
         {result && (
           <div className="flex flex-col lg:flex-row gap-6 items-start">
 
-            {/* Sticky Navigation Sidebar */}
-            <aside className="hidden lg:block sticky top-8 w-52 shrink-0 border border-zinc-800/60 bg-zinc-950/80 rounded-2xl p-3 space-y-0.5 shadow-xl backdrop-blur-sm">
-              <div className="text-[10px] uppercase text-zinc-600 font-bold px-3 py-2 border-b border-zinc-800/60 mb-1 tracking-widest">
-                Report Sections
+            {/* Sticky Navigation Sidebar (Documentation Style Index) */}
+            <aside className="hidden lg:block sticky top-20 w-56 shrink-0 border border-zinc-800/80 bg-zinc-950/90 rounded-2xl p-3 space-y-1 shadow-xl backdrop-blur-md">
+              <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-800/80 mb-1.5">
+                <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-widest font-mono">
+                  Report Index
+                </span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               </div>
               {[
-                { id: "section-risk",        label: "Risk Score" },
-                { id: "section-ai",          label: "AI Analyst" },
-                { id: "section-nlp",         label: "NLP Engine" },
-                { id: "section-payload",     label: "Email Payload" },
-                { id: "section-attachments", label: "Attachments" },
-                { id: "section-auth",        label: "Auth Audit" },
-                { id: "section-domain",      label: "Domain Intel" },
-                { id: "section-graph",       label: "Threat Graph" },
-                { id: "section-threat",      label: "Threat Intel" },
-                { id: "section-url",         label: "URL Analysis" },
-                { id: "section-route",       label: "Route Map" },
-              ].map((sec, idx) => (
-                <button
-                  key={sec.id}
-                  onClick={() => {
-                    document.getElementById(sec.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-                  }}
-                  className="w-full text-left text-[11px] text-zinc-500 hover:text-zinc-100 hover:bg-zinc-900/80 px-3 py-2 rounded-lg transition-all duration-150 flex items-center gap-2.5 group"
-                >
-                  <span className="text-[9px] text-zinc-700 group-hover:text-zinc-500 tabular-nums font-mono w-4 shrink-0">{String(idx + 1).padStart(2, '0')}</span>
-                  <span className="font-medium">{sec.label}</span>
-                </button>
-              ))}
+                { id: "section-risk",        label: "Risk Score",     badge: "01" },
+                { id: "section-ai",          label: "AI Analyst",     badge: "02" },
+                { id: "section-nlp",         label: "NLP Engine",     badge: "03" },
+                { id: "section-payload",     label: "Email Payload",  badge: "04" },
+                { id: "section-attachments", label: "Attachments",    badge: "05" },
+                { id: "section-auth",        label: "Auth Audit",     badge: "06" },
+                { id: "section-domain",      label: "Domain Intel",   badge: "07" },
+                { id: "section-geo",         label: "Route Map",      badge: "08" },
+                { id: "section-graph",       label: "Threat Graph",   badge: "09" },
+                { id: "section-threat",      label: "Threat Intel",   badge: "10" },
+                { id: "section-url",         label: "URL Analysis",   badge: "11" },
+                { id: "section-route",       label: "SMTP Route",     badge: "12" },
+                { id: "section-anomalies",   label: "Anomalies",      badge: "13" },
+              ].map((sec) => {
+                const isActive = activeSectionId === sec.id;
+                return (
+                  <button
+                    key={sec.id}
+                    onClick={() => scrollToSection(sec.id)}
+                    className={`w-full text-left text-[11px] px-3 py-2 rounded-lg transition-all duration-150 flex items-center justify-between group cursor-pointer border ${
+                      isActive
+                        ? "bg-emerald-950/60 text-emerald-300 font-bold border-emerald-700/80 shadow-[inset_0_1px_0_rgba(52,211,153,0.2)]"
+                        : "text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900/60 border-transparent"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span
+                        className={`text-[9px] tabular-nums font-mono w-4 shrink-0 transition-colors ${
+                          isActive
+                            ? "text-emerald-400 font-bold"
+                            : "text-zinc-600 group-hover:text-zinc-400"
+                        }`}
+                      >
+                        {sec.badge}
+                      </span>
+                      <span className="truncate">{sec.label}</span>
+                    </div>
+
+                    {isActive && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)] shrink-0" />
+                    )}
+                  </button>
+                );
+              })}
             </aside>
 
             {/* Main Report Content */}
@@ -405,13 +482,13 @@ export default function Home() {
 
             {/* Phase 10: Multi-Factor Risk Score Engine */}
             {result.analysis?.riskEvaluation && (
-              <div id="section-risk" className="scroll-mt-8">
+              <div id="section-risk" className="scroll-mt-20">
                 <RiskScoreGauge riskEvaluation={result.analysis.riskEvaluation} />
               </div>
             )}
 
             {/* Phase 12: True AI LLM Semantic Analysis */}
-            <div id="section-ai" className="scroll-mt-8">
+            <div id="section-ai" className="scroll-mt-20">
               <AiAnalystCard 
                 aiAnalysis={result.analysis?.aiAnalysis} 
                 emailId={result.id}
@@ -432,23 +509,23 @@ export default function Home() {
 
             {/* Phase 11: NLP Social Engineering & BEC Heuristics */}
             {result.analysis?.nlpAnalysis && (
-              <div id="section-nlp" className="scroll-mt-8">
+              <div id="section-nlp" className="scroll-mt-20">
                 <NlpAnalysisCard nlpAnalysis={result.analysis.nlpAnalysis} />
               </div>
             )}
 
             {/* Extracted Payload Headers & Decrypted Body */}
-            <div id="section-payload" className="scroll-mt-8">
+            <div id="section-payload" className="scroll-mt-20">
               <ExtractedPayloadCard evidence={result} />
             </div>
 
             {/* Attachments Breakdown */}
-            <div id="section-attachments" className="scroll-mt-8">
+            <div id="section-attachments" className="scroll-mt-20">
               <AttachmentPayloadCard attachments={result.analysis?.attachments || []} />
             </div>
 
             {/* Phase 4: Authentication Protocols (SPF / DKIM / DMARC) */}
-            <div id="section-auth" className="scroll-mt-8">
+            <div id="section-auth" className="scroll-mt-20">
               <AuthAuditCard
                 spfResult={result.spfResult}
                 dkimResult={result.dkimResult}
@@ -459,14 +536,14 @@ export default function Home() {
 
             {/* Phase 5: Domain Forensics & Typosquatting */}
             {result.analysis?.domainAnalysis && (
-              <div id="section-domain" className="scroll-mt-8">
+              <div id="section-domain" className="scroll-mt-20">
                 <DomainForensicsCard domainAnalysis={result.analysis.domainAnalysis} />
               </div>
             )}
 
             {/* Phase 8: Geographical Route Map */}
             {result.analysis?.routeAnalysis && (
-              <div className="scroll-mt-8">
+              <div id="section-geo" className="scroll-mt-20">
                 <GeoRouteMap 
                   hops={result.analysis.routeAnalysis.hops}
                 />
@@ -474,20 +551,20 @@ export default function Home() {
             )}
 
             {/* Phase 13: Interactive Threat Graph */}
-            <div id="section-graph" className="scroll-mt-8">
+            <div id="section-graph" className="scroll-mt-20">
               <ThreatGraphCard evidence={result} />
             </div>
 
             {/* Phase 9: Global Threat Intelligence Feeds */}
             {result.analysis?.threatIntel && (
-              <div id="section-threat" className="scroll-mt-8">
+              <div id="section-threat" className="scroll-mt-20">
                 <ThreatIntelCard threatIntel={result.analysis.threatIntel} />
               </div>
             )}
 
             {/* Phase 6: Embedded Links & URL Analysis */}
             {result.analysis?.urlAnalysis && (
-              <div id="section-url" className="scroll-mt-8">
+              <div id="section-url" className="scroll-mt-20">
                 <UrlAnalysisCard
                   urlAnalysis={result.analysis.urlAnalysis}
                   onOpenBadge={setSelectedBadge}
@@ -497,7 +574,7 @@ export default function Home() {
 
             {/* Phase 7 & 8: SMTP Route & Interactive Geolocation Map */}
             {result.analysis?.routeAnalysis && (
-              <div id="section-route" className="scroll-mt-8">
+              <div id="section-route" className="scroll-mt-20">
                 <SmtpRouteCard
                   routeAnalysis={result.analysis.routeAnalysis}
                   rawReceivedHeaders={result.receivedHeaders}
@@ -508,7 +585,9 @@ export default function Home() {
 
             {/* Forensic Anomalies Alert Box */}
             {result.analysis?.anomalies && result.analysis.anomalies.length > 0 && (
-              <AnomaliesAlert anomalies={result.analysis.anomalies} />
+              <div id="section-anomalies" className="scroll-mt-20">
+                <AnomaliesAlert anomalies={result.analysis.anomalies} />
+              </div>
             )}
           </section>
           </div>

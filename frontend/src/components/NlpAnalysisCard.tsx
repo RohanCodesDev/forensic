@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { NlpAnalysis } from "../types/forensic";
+import InfoTooltip from "./InfoTooltip";
 
 interface NlpAnalysisCardProps {
   nlpAnalysis: NlpAnalysis;
@@ -75,6 +76,10 @@ export default function NlpAnalysisCard({ nlpAnalysis }: NlpAnalysisCardProps) {
                 <span className="text-xs uppercase tracking-widest text-gray-400 font-semibold font-mono">
                   NLP SOCIAL ENGINEERING ENGINE
                 </span>
+                <InfoTooltip
+                  title="NLP Social Engineering Engine"
+                  explanation="Natural Language Processing scanner that analyzes text phrasing to detect urgency, authority pressure, fear tactics, or fraudulent wire-transfer requests common in executive impersonation (BEC) scams."
+                />
                 <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border uppercase ${style.badge}`}>
                   {intentLevel} INTENT
                 </span>

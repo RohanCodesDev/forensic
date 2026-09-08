@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { AiAnalysis } from "../types/forensic";
+import InfoTooltip from "./InfoTooltip";
 
 interface AiAnalystCardProps {
   aiAnalysis?: AiAnalysis | null;
@@ -208,6 +209,10 @@ export default function AiAnalystCard({
             <div>
               <h3 className="font-mono text-sm tracking-wider text-white font-bold uppercase flex items-center gap-2">
                 COGNITIVE SOC THREAT TELEMETRY
+                <InfoTooltip
+                  title="Cognitive SOC Threat Telemetry"
+                  explanation="Uses advanced AI neural models (Groq Qwen-27B) to read the email and detect psychological pressure, deception, spoofed identities, and social-engineering traps."
+                />
                 <span className={`text-[10px] font-mono px-2 py-0.5 rounded border border-gray-700 bg-black ${theme.text}`}>
                   GROQ :: QWEN-27B
                 </span>

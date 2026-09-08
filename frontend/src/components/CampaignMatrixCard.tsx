@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { CampaignCorrelationResult, CampaignCluster } from "../types/forensic";
+import InfoTooltip from "./InfoTooltip";
 
 interface CampaignMatrixProps {
   data: CampaignCorrelationResult | null;
@@ -56,8 +57,12 @@ export default function CampaignMatrixCard({
         <div className="flex items-center justify-between border-b border-zinc-800 pb-3 font-mono">
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 bg-purple-400"></span>
-            <h2 className="text-xs sm:text-sm font-bold text-zinc-100 uppercase tracking-widest">
+            <h2 className="text-xs sm:text-sm font-bold text-zinc-100 uppercase tracking-widest flex items-center gap-2">
               [ THREAT CAMPAIGN MATRIX // INFRASTRUCTURE CORRELATION ]
+              <InfoTooltip
+                title="Threat Campaign Matrix"
+                explanation="Clusters multiple separate emails that share identical sender servers, lookalike domains, or phishing links to reveal organized attacker phishing campaigns."
+              />
             </h2>
           </div>
           <button
@@ -112,8 +117,12 @@ export default function CampaignMatrixCard({
               </svg>
             </span>
             <div>
-              <h2 className="text-base sm:text-lg font-mono font-bold text-white uppercase tracking-wider">
+              <h2 className="text-base sm:text-lg font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
                 Discovered Threat Campaigns ({data.campaigns.length})
+                <InfoTooltip
+                  title="Discovered Threat Campaigns"
+                  explanation="Clusters multiple separate emails that share identical sender servers, lookalike domains, or phishing links to reveal organized attacker phishing campaigns."
+                />
               </h2>
               <p className="text-xs font-mono text-gray-500">
                 Automated multi-mailbox attack cluster detection & infrastructure convergence
