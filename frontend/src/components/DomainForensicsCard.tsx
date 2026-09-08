@@ -43,7 +43,7 @@ export default function DomainForensicsCard({ domainAnalysis }: DomainForensicsC
               </span>
               <span className="text-xs text-rose-500/80 font-mono">
                 TYPE: {domainAnalysis.brandImpersonation.matchType} 
-                {domainAnalysis.brandImpersonation.matchType === "TYPOSQUAT" && ` (Levenshtein Distance: ${domainAnalysis.brandImpersonation.distance})`}
+                {domainAnalysis.brandImpersonation.matchType === "TYPOSQUAT" && ` (Spelling Edit Distance: ${domainAnalysis.brandImpersonation.distance})`}
               </span>
             </div>
           ) : (

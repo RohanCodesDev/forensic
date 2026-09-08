@@ -1,8 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 :root {
   --background: #030304;
   --foreground: #d4d4d8;
+  --font-lexend: 'Lexend', system-ui, -apple-system, sans-serif;
 }
 
 @theme inline {
@@ -17,21 +19,19 @@ html {
   text-rendering: optimizeLegibility;
 }
 
+/* ── Universal Lexend font override ─────────────────────────────── */
+* {
+  font-family: 'Lexend', var(--font-lexend), system-ui, -apple-system, sans-serif !important;
+}
+
 body {
   background: #030304;
   color: #d4d4d8;
-  font-family: var(--font-lexend), "Lexend", system-ui, -apple-system, sans-serif;
   letter-spacing: -0.01em;
   line-height: 1.6;
 }
 
-/* Mono overrides — keep code/telemetry elements crisp */
-code, pre, kbd, samp, .font-mono {
-  font-family: ui-monospace, "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", monospace;
-  letter-spacing: 0;
-}
-
-/* ---------- Custom Minimalist Cyber Scrollbar ---------- */
+/* ── Custom Minimalist Cyber Scrollbar ───────────────────────────── */
 ::-webkit-scrollbar {
   width: 4px;
   height: 4px;
@@ -47,7 +47,7 @@ code, pre, kbd, samp, .font-mono {
   background: #3f3f46;
 }
 
-/* ---------- Leaflet Dark SOC Overrides ---------- */
+/* ── Leaflet Dark SOC Overrides ──────────────────────────────────── */
 .leaflet-popup-content-wrapper,
 .leaflet-popup-tip {
   background: #09090b !important;
@@ -60,7 +60,7 @@ code, pre, kbd, samp, .font-mono {
   background: #040405 !important;
 }
 
-/* ---------- Phase 15: PDF Export (Print Styles) ---------- */
+/* ── PDF Export (Print Styles) ───────────────────────────────────── */
 @media print {
   body {
     background-color: #0a0a0a !important;
@@ -100,7 +100,7 @@ code, pre, kbd, samp, .font-mono {
   }
 }
 
-/* ---------- Utility: custom scrollbar for inline elements ---------- */
+/* ── Utility: custom scrollbar for inline elements ───────────────── */
 .custom-scrollbar::-webkit-scrollbar {
   width: 3px;
   height: 3px;

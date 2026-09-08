@@ -73,7 +73,7 @@ export default function NlpAnalysisCard({ nlpAnalysis }: NlpAnalysisCardProps) {
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs uppercase tracking-widest text-gray-400 font-semibold font-mono">
-                  [PHASE 11] NLP SOCIAL ENGINEERING ENGINE
+                  NLP SOCIAL ENGINEERING ENGINE
                 </span>
                 <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border uppercase ${style.badge}`}>
                   {intentLevel} INTENT

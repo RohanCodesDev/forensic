@@ -54,7 +54,7 @@ export default function RiskScoreGauge({ riskEvaluation }: RiskScoreGaugeProps) 
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs uppercase tracking-widest text-gray-400 font-semibold font-mono">
-                [PHASE 10] RISK SCORE ENGINE
+                AI MULTI-FACTOR RISK ENGINE
               </span>
               <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border uppercase ${style.badge}`}>
                 {severity} SEVERITY

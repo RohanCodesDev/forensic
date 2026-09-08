@@ -62,20 +62,20 @@ export default function AiAnalystCard({
               </div>
               <div>
                 <h3 className="font-mono text-sm tracking-wider text-white font-bold uppercase flex items-center gap-2">
-                  NEURAL INTENT REASONING ENGINE
+                  AI SECURITY ANALYST
                   <span className="text-[10px] px-2 py-0.5 rounded border border-indigo-800/60 bg-indigo-950/40 text-indigo-300 font-mono">
-                    GROQ :: QWEN-27B
+                    GROQ :: LLM REASONING
                   </span>
                 </h3>
                 <p className="text-xs text-gray-500 font-mono mt-0.5 uppercase tracking-widest">
-                  Deep Cognitive Threat Extraction & Adversarial Intent
+                  Deep Semantic Reasoning & MITRE ATT&CK Mapping
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
               <span className="text-xs font-mono px-2.5 py-1 rounded bg-zinc-900/80 border border-zinc-800 text-amber-300 font-semibold uppercase tracking-wider">
-                STANDBY :: READY
+                READY FOR ANALYSIS
               </span>
             </div>
           </div>
@@ -83,10 +83,10 @@ export default function AiAnalystCard({
           <div className="bg-zinc-950/80 border border-indigo-900/30 rounded-xl p-6 sm:p-8 text-center space-y-5 backdrop-blur-sm">
             <div className="max-w-xl mx-auto space-y-2">
               <p className="font-mono text-xs text-gray-300 font-medium">
-                Cognitive semantic telemetry is ready for execution on this evidence dossier.
+                AI Threat Telemetry is ready to analyze this email evidence.
               </p>
               <p className="font-mono text-[11px] text-gray-500">
-                Dispatches adversarial prompt matrix to Groq Qwen-27B neural pipeline to extract psychological coercion vectors, spear-phishing intents, and authority spoofing markers.
+                Executes Groq LLM reasoning to extract attack methodology, social engineering indicators, MITRE ATT&CK technique mapping, and actionable remediation steps.
               </p>
             </div>
 
@@ -108,14 +108,14 @@ export default function AiAnalystCard({
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
                     </svg>
-                    <span className="animate-pulse">ENGAGING NEURAL INFERENCE MATRIX...</span>
+                    <span className="animate-pulse">ANALYZING THREAT INTELLIGENCE WITH AI...</span>
                   </>
                 ) : (
                   <>
                     <svg className="w-4 h-4 text-indigo-300 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
-                    <span>⚡ INITIALIZE NEURAL FORENSIC INFERENCE</span>
+                    <span>⚡ RUN AI SECURITY ANALYSIS</span>
                   </>
                 )}
               </button>
@@ -126,7 +126,7 @@ export default function AiAnalystCard({
               <span>•</span>
               <span>ZERO LOG RETENTION</span>
               <span>•</span>
-              <span>SOC TACTICAL ADVISORY</span>
+              <span>INCIDENT RESPONSE CHECKLIST</span>
             </div>
           </div>
         </div>

@@ -105,7 +105,7 @@ export default function Home() {
     }
 
     setLoading(true);
-    setStatus("Initiating cryptographic parser protocol & threat intelligence lookup...");
+    setStatus("Parsing email structure & running threat intelligence checks...");
     setResult(null);
 
     const formData = new FormData();
@@ -120,14 +120,14 @@ export default function Home() {
       const data = await response.json();
 
       if (response.ok) {
-        setStatus("Success: Forensic analysis & database persistence complete.");
+        setStatus("Analysis complete — forensic report saved to Evidence Vault.");
         setResult({ ...data.data, analysis: data.analysis });
         refreshAllData(); // Refresh case list and campaign matrix
       } else {
         setStatus(`Error: ${data.message || "Upload failed"}`);
       }
     } catch {
-      setStatus("Fatal: Backend connection refused. Verify the server is running.");
+      setStatus("Connection failed — ensure the backend server is running on port 8000.");
     } finally {
       setLoading(false);
     }
@@ -135,7 +135,7 @@ export default function Home() {
 
   const handleSelectCase = async (id: string) => {
     try {
-      setStatus("Retrieving case evidence from PostgreSQL vault...");
+      setStatus("Loading case from Evidence Vault...");
       const res = await fetch(`${getApiUrl()}/api/emails/${id}`);
       const json = await res.json();
       if (res.ok && json.data) {
@@ -171,13 +171,13 @@ export default function Home() {
   };
 
   return (
-    <div className={`min-h-screen bg-[#030304] text-gray-300 ${lexend.variable} font-[family-name:var(--font-lexend)] selection:bg-emerald-500/30 selection:text-emerald-100`}>
+    <div className={`min-h-screen bg-[#030304] text-gray-300 ${lexend.variable} font-[family-name:var(--font-lexend)] selection:bg-emerald-500/20 selection:text-emerald-100`}>
       <Head>
         <title>Forensic Mail | AI & Threat Intelligence Suite</title>
         <meta name="description" content="AI-Powered Email Threat Detection, Geolocation and Forensic Intelligence Platform" />
       </Head>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pb-16 space-y-5 md:space-y-6 pt-6 md:pt-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pb-20 space-y-6 md:space-y-8 pt-7 md:pt-10">
         <Header
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -225,69 +225,79 @@ export default function Home() {
 
         {/* ACTIVE INVESTIGATION REPORT VIEW */}
         {result && (
-          <div className="flex flex-col lg:flex-row gap-5 items-start">
+          <div className="flex flex-col lg:flex-row gap-6 items-start">
 
             {/* Sticky Navigation Sidebar */}
-            <aside className="hidden lg:block sticky top-8 w-56 shrink-0 border border-zinc-800/80 bg-zinc-950 rounded-xl p-3 space-y-0.5">
-              <div className="font-mono text-[9px] uppercase text-zinc-600 font-bold px-2.5 py-1.5 border-b border-zinc-800/60 mb-2 tracking-widest">
-                Report Telemetry Index
+            <aside className="hidden lg:block sticky top-8 w-52 shrink-0 border border-zinc-800/60 bg-zinc-950/80 rounded-2xl p-3 space-y-0.5 shadow-xl backdrop-blur-sm">
+              <div className="text-[10px] uppercase text-zinc-600 font-bold px-3 py-2 border-b border-zinc-800/60 mb-1 tracking-widest">
+                Report Sections
               </div>
               {[
-                { id: "section-risk", label: "[01] Risk Engine" },
-                { id: "section-ai", label: "[02] Neural Analyst" },
-                { id: "section-nlp", label: "[03] NLP Heuristics" },
-                { id: "section-payload", label: "[04] Raw Payload" },
-                { id: "section-attachments", label: "[05] Attachments" },
-                { id: "section-auth", label: "[06] Auth Audit" },
-                { id: "section-domain", label: "[07] Domain Intel" },
-                { id: "section-graph", label: "[08] Threat Graph" },
-                { id: "section-threat", label: "[09] CTI Feeds" },
-                { id: "section-url", label: "[10] URL Analysis" },
-                { id: "section-route", label: "[11] SMTP Routing" },
-              ].map((sec) => (
+                { id: "section-risk",        label: "Risk Score" },
+                { id: "section-ai",          label: "AI Analyst" },
+                { id: "section-nlp",         label: "NLP Engine" },
+                { id: "section-payload",     label: "Email Payload" },
+                { id: "section-attachments", label: "Attachments" },
+                { id: "section-auth",        label: "Auth Audit" },
+                { id: "section-domain",      label: "Domain Intel" },
+                { id: "section-graph",       label: "Threat Graph" },
+                { id: "section-threat",      label: "Threat Intel" },
+                { id: "section-url",         label: "URL Analysis" },
+                { id: "section-route",       label: "Route Map" },
+              ].map((sec, idx) => (
                 <button
                   key={sec.id}
                   onClick={() => {
                     document.getElementById(sec.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
                   }}
-                  className="w-full text-left font-mono text-[11px] text-zinc-500 hover:text-zinc-100 hover:bg-zinc-900 px-2.5 py-1.5 rounded-md transition-colors"
+                  className="w-full text-left text-[11px] text-zinc-500 hover:text-zinc-100 hover:bg-zinc-900/80 px-3 py-2 rounded-lg transition-all duration-150 flex items-center gap-2.5 group"
                 >
-                  {sec.label}
+                  <span className="text-[9px] text-zinc-700 group-hover:text-zinc-500 tabular-nums font-mono w-4 shrink-0">{String(idx + 1).padStart(2, '0')}</span>
+                  <span className="font-medium">{sec.label}</span>
                 </button>
               ))}
             </aside>
 
             {/* Main Report Content */}
-            <section ref={reportRef} className="flex-1 min-w-0 bg-zinc-950 border border-zinc-800/80 rounded-xl p-5 sm:p-6 space-y-5 print:p-0 print:border-none">
+            <section ref={reportRef} className="flex-1 min-w-0 bg-zinc-950/80 border border-zinc-800/60 rounded-2xl p-6 sm:p-8 space-y-6 shadow-xl print:p-0 print:border-none">
 
               {/* Report Dossier Header */}
-              <div className="flex items-center justify-between border-b border-zinc-800/60 pb-4 print:border-b-2 print:border-gray-600 print:mb-8">
-                <div className="flex items-center gap-2.5 font-mono min-w-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                  <span className="text-xs font-bold uppercase tracking-widest text-zinc-200 truncate">
-                    Evidence Dossier: {result.filename}
-                  </span>
-                  {result.sha256Hash && (
-                    <span className="text-[10px] text-zinc-600 hidden sm:inline tabular-nums">
-                      [{result.sha256Hash.substring(0, 12)}...]
-                    </span>
-                  )}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800/60 pb-6 print:border-b-2 print:border-gray-600 print:mb-8">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-950/60 border border-emerald-800/60 flex items-center justify-center text-emerald-400 shrink-0">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-zinc-100 truncate tracking-tight">
+                      {result.filename}
+                    </p>
+                    {result.sha256Hash && (
+                      <p className="text-[10px] text-zinc-600 font-mono tabular-nums mt-0.5">
+                        SHA-256: {result.sha256Hash.substring(0, 20)}...
+                      </p>
+                    )}
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2 print-hidden font-mono text-[11px] shrink-0 ml-3">
+                <div className="flex items-center gap-2 print-hidden shrink-0">
                   <button
                     onClick={() => handlePrint()}
-                    className="px-2.5 py-1.5 bg-zinc-900 border border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-white rounded-md transition-all flex items-center gap-1.5"
+                    className="flex items-center gap-2 px-3.5 py-2 bg-zinc-900 border border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-white rounded-xl text-xs font-semibold transition-all"
                   >
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                     </svg>
                     Export PDF
                   </button>
                   <button
                     onClick={() => setResult(null)}
-                    className="px-2.5 py-1.5 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-500 hover:text-zinc-300 rounded-md transition-all"
+                    className="flex items-center gap-2 px-3.5 py-2 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-500 hover:text-zinc-300 rounded-xl text-xs font-semibold transition-all"
                   >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                     Close
                   </button>
                 </div>
