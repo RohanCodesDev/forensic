@@ -12,7 +12,7 @@ import { scanAllAttachments } from './attachment.service';
  * It takes parsed email data and routes it through all specialized engines (Domain, URL, Route, CTI, NLP),
  * compiles the results, and calculates the final Multi-Factor Risk Score and Threat Level.
  */
-export const runFullAnalysis = async (emailData: any, parsed: any, attachments: any[]) => {
+export const runFullAnalysis = async (emailData: any, parsed: any, attachments: any[], skipAiAnalysis: boolean = false) => {
   const anomalies: string[] = [];
 
   // Helper to safely extract just the email address part from "Name <email@domain.com>"
@@ -139,11 +139,13 @@ export const runFullAnalysis = async (emailData: any, parsed: any, attachments: 
   };
 
   let aiAnalysis = null;
-  try {
-    const textBody = emailData.textBodySnippet || '';
-    aiAnalysis = await analyzeWithAI(textBody, emailData.subject || '', forensicContext);
-  } catch (error: any) {
-    console.error('[AI Analysis Error] Failed to reach Groq API:', error.message);
+  if (!skipAiAnalysis) {
+    try {
+      const textBody = emailData.textBodySnippet || '';
+      aiAnalysis = await analyzeWithAI(textBody, emailData.subject || '', forensicContext);
+    } catch (error: any) {
+      console.error('[AI Analysis Error] Failed to reach Groq API:', error.message);
+    }
   }
   // Phase 14: Attachment Malware Hash Analysis
   let malwareScanResults = [];

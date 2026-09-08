@@ -36,6 +36,7 @@ export default function Home() {
   const [campaignData, setCampaignData] = useState<CampaignCorrelationResult | null>(null);
   const [campaignLoading, setCampaignLoading] = useState<boolean>(false);
   const [selectedBadge, setSelectedBadge] = useState<BadgeInfo | null>(null);
+  const [autoScanResults, setAutoScanResults] = useState<any[]>([]);
 
   // Phase 15: Print / Export PDF Ref
   const reportRef = useRef<HTMLElement>(null);
@@ -186,13 +187,85 @@ export default function Home() {
         />
 
         {activeTab === "ingest" && (
-          <EvidenceIngestion
-            file={file}
-            status={status}
-            loading={loading}
-            onFileChange={handleFileChange}
-            onUpload={handleUpload}
-          />
+          <div className="space-y-6">
+            <EvidenceIngestion
+              file={file}
+              status={status}
+              loading={loading}
+              onFileChange={handleFileChange}
+              onUpload={handleUpload}
+              onAutoScanComplete={(results) => {
+                setAutoScanResults(results);
+                refreshAllData();
+              }}
+            />
+
+            {/* Render Auto Scan Results right on the screen */}
+            {autoScanResults.length > 0 && (
+              <section className="bg-zinc-950/80 border border-zinc-800/60 rounded-2xl p-6 shadow-xl backdrop-blur-sm space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-bold text-zinc-100">Automated Scan Results</h3>
+                    <p className="text-xs text-zinc-500 font-medium">Click on any result below to open its deep forensic report.</p>
+                  </div>
+                  <button 
+                    onClick={() => setAutoScanResults([])}
+                    className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors bg-zinc-900 px-3 py-1.5 rounded-lg border border-zinc-800 hover:border-zinc-700"
+                  >
+                    Clear Results
+                  </button>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {autoScanResults.map((item, idx) => (
+                    <div 
+                      key={idx} 
+                      onClick={() => {
+                        setResult({ ...item.data, analysis: item.analysis });
+                        setTimeout(() => document.getElementById("section-risk")?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+                      }}
+                      className="group cursor-pointer bg-black/40 border border-zinc-800 hover:border-indigo-500/50 hover:bg-indigo-950/20 rounded-xl p-4 transition-all duration-200"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-2 font-mono text-xs text-zinc-400">
+                          <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
+                          {item.data.filename}
+                        </div>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-widest ${
+                          item.analysis?.riskEvaluation?.severity === 'HIGH' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
+                          item.analysis?.riskEvaluation?.severity === 'MEDIUM' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+                          'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                        }`}>
+                          {item.analysis?.riskEvaluation?.severity || 'LOW'} RISK
+                        </span>
+                      </div>
+                      <div className="text-sm font-semibold text-zinc-200 truncate">
+                        {item.data.subject || "No Subject"}
+                      </div>
+                      <div className="text-xs text-zinc-500 truncate mt-1">
+                        From: {item.data.from}
+                      </div>
+                      
+                      <div className="flex items-center gap-2 mt-4 pt-4 border-t border-zinc-800/60">
+                        <span className="text-[10px] text-zinc-400 bg-zinc-900 px-2 py-1 rounded border border-zinc-800">
+                          Score: {item.analysis?.riskEvaluation?.score || 0}/100
+                        </span>
+                        {(item.analysis?.anomalies?.length || 0) > 0 && (
+                          <span className="text-[10px] text-rose-400 bg-rose-950/30 px-2 py-1 rounded border border-rose-900/50">
+                            {item.analysis.anomalies.length} Anomalies
+                          </span>
+                        )}
+                        <span className="ml-auto text-[10px] font-bold text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                          VIEW REPORT
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
         )}
 
         {activeTab === "vault" && (

@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import InboxScannerModal from "./InboxScannerModal";
 
 interface EvidenceIngestionProps {
   file: File | null;
@@ -6,6 +7,7 @@ interface EvidenceIngestionProps {
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onUpload: () => void;
   loading: boolean;
+  onAutoScanComplete?: (results: any[]) => void;
 }
 
 export default function EvidenceIngestion({
@@ -14,13 +16,27 @@ export default function EvidenceIngestion({
   onFileChange,
   onUpload,
   loading,
+  onAutoScanComplete,
 }: EvidenceIngestionProps) {
+  const [showScanner, setShowScanner] = useState(false);
   const hasError = status.includes("Error") || status.includes("Fatal");
 
   return (
     <section className="relative overflow-hidden rounded-2xl border border-zinc-800/60 bg-zinc-950 shadow-xl">
       {/* Subtle top highlight line */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
+
+      {showScanner && (
+        <InboxScannerModal 
+          onClose={() => setShowScanner(false)} 
+          onScanComplete={(results) => {
+            setShowScanner(false);
+            if (onAutoScanComplete) {
+              onAutoScanComplete(results);
+            }
+          }} 
+        />
+      )}
 
       <div className="p-6 sm:p-8 space-y-6">
         {/* Section Header */}
@@ -126,6 +142,24 @@ export default function EvidenceIngestion({
               Analyze Email Threat
             </>
           )}
+        </button>
+
+        {/* OR Divider */}
+        <div className="relative flex items-center py-2">
+          <div className="flex-grow border-t border-zinc-800/60"></div>
+          <span className="flex-shrink-0 mx-4 text-xs font-semibold text-zinc-500 uppercase tracking-widest">Or</span>
+          <div className="flex-grow border-t border-zinc-800/60"></div>
+        </div>
+
+        {/* Auto Scan Button */}
+        <button
+          onClick={() => setShowScanner(true)}
+          className="w-full py-3.5 rounded-xl text-sm font-bold tracking-wide uppercase transition-all duration-200 flex items-center justify-center gap-2.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 shadow-[inset_0_0_12px_rgba(99,102,241,0.1)] hover:shadow-[0_0_24px_rgba(99,102,241,0.2)]"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          Connect & Auto-Scan Inbox (IMAP)
         </button>
 
         {/* Status message */}
