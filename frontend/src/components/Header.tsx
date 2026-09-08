@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 
 interface HeaderProps {
-  activeTab: "ingest" | "vault" | "campaigns" | "cases";
-  setActiveTab: (tab: "ingest" | "vault" | "campaigns" | "cases") => void;
+  activeTab: "ingest" | "vault" | "campaigns" | "cases" | "globe";
+  setActiveTab: (tab: "ingest" | "vault" | "campaigns" | "cases" | "globe") => void;
   vaultCount: number;
   campaignCount?: number;
 }
@@ -64,6 +64,17 @@ export default function Header({ activeTab, setActiveTab, vaultCount, campaignCo
       ),
       activeClasses: "bg-amber-950/60 text-amber-100 border-amber-800/60 shadow-[inset_0_1px_0_rgba(251,191,36,0.15)]",
       iconColor: "text-amber-400",
+    },
+    {
+      id: "globe" as const,
+      label: "Command Center",
+      icon: (
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+      activeClasses: "bg-rose-950/60 text-rose-100 border-rose-800/60 shadow-[inset_0_1px_0_rgba(244,63,94,0.15)]",
+      iconColor: "text-rose-400",
     },
   ];
 

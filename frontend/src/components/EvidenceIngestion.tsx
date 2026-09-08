@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import InboxScannerModal from "./InboxScannerModal";
+import AttackSimulatorModal from "./AttackSimulatorModal";
 
 interface EvidenceIngestionProps {
   file: File | null;
@@ -8,33 +9,68 @@ interface EvidenceIngestionProps {
   onUpload: () => void;
   loading: boolean;
   onAutoScanComplete?: (results: any[]) => void;
+  onEvidenceIngested?: (data: any, analysis: any) => void;
+  apiUrl?: string;
 }
 
 export default function EvidenceIngestion({
   file,
-  status,
+  status: initialStatus,
   onFileChange,
   onUpload,
   loading,
   onAutoScanComplete,
+  onEvidenceIngested,
+  apiUrl = "",
 }: EvidenceIngestionProps) {
-  const [showScanner, setShowScanner] = useState(false);
+  const [status, setStatus] = useState<string>(initialStatus);
+  const [showScannerModal, setShowScannerModal] = useState(false);
+  const [showSimulatorModal, setShowSimulatorModal] = useState(false);
   const hasError = status.includes("Error") || status.includes("Fatal");
+
+  const handleSimulate = async (options: any) => {
+    setStatus("injecting");
+    try {
+      const res = await fetch(`${apiUrl}/api/emails/simulate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(options),
+      });
+
+      const json = await res.json();
+      if (res.ok && json.data) {
+        setStatus("success");
+        if (onEvidenceIngested) onEvidenceIngested(json.data, json.analysis);
+      } else {
+        throw new Error(json.message || "Failed to simulate attack");
+      }
+    } catch (err: any) {
+      console.error(err);
+      setStatus("Error: " + (err.message || "Error connecting to simulator"));
+    }
+  };
 
   return (
     <section className="relative overflow-hidden rounded-2xl border border-zinc-800/60 bg-zinc-950 shadow-xl">
       {/* Subtle top highlight line */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
 
-      {showScanner && (
+      {showScannerModal && (
         <InboxScannerModal 
-          onClose={() => setShowScanner(false)} 
+          onClose={() => setShowScannerModal(false)} 
           onScanComplete={(results) => {
-            setShowScanner(false);
+            setShowScannerModal(false);
             if (onAutoScanComplete) {
               onAutoScanComplete(results);
             }
           }} 
+        />
+      )}
+
+      {showSimulatorModal && (
+        <AttackSimulatorModal
+          onClose={() => setShowSimulatorModal(false)}
+          onSimulate={handleSimulate}
         />
       )}
 
@@ -52,12 +88,20 @@ export default function EvidenceIngestion({
               <p className="text-xs text-zinc-500 font-medium mt-0.5">Header parsing · SPF/DKIM/DMARC · Route tracing · AI analysis</p>
             </div>
           </div>
-          <span className="self-start sm:self-auto inline-flex items-center gap-1.5 text-[10px] font-semibold tracking-wider uppercase bg-zinc-900 border border-zinc-800 text-zinc-400 px-3 py-1.5 rounded-lg">
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-            SHA-256 Fingerprint
-          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowScannerModal(true)}
+              className="inline-flex items-center gap-2 text-[10px] font-semibold tracking-wider uppercase bg-zinc-900 border border-zinc-800 text-emerald-400 px-3 py-1.5 rounded-lg hover:bg-zinc-800"
+            >
+              Scan Inbox
+            </button>
+            <button
+              onClick={() => setShowSimulatorModal(true)}
+              className="inline-flex items-center gap-2 text-[10px] font-semibold tracking-wider uppercase bg-rose-950/20 border border-rose-900/50 text-rose-400 px-3 py-1.5 rounded-lg hover:bg-rose-950/40"
+            >
+              Simulate
+            </button>
+          </div>
         </div>
 
         {/* Divider */}
@@ -153,7 +197,7 @@ export default function EvidenceIngestion({
 
         {/* Auto Scan Button */}
         <button
-          onClick={() => setShowScanner(true)}
+          onClick={() => setShowScannerModal(true)}
           className="w-full py-3.5 rounded-xl text-sm font-bold tracking-wide uppercase transition-all duration-200 flex items-center justify-center gap-2.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 shadow-[inset_0_0_12px_rgba(99,102,241,0.1)] hover:shadow-[0_0_24px_rgba(99,102,241,0.2)]"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

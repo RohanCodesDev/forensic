@@ -21,12 +21,13 @@ import AiAnalystCard from "../components/AiAnalystCard";
 import ThreatGraphCard from "../components/ThreatGraphCard";
 import GeoRouteMap from "../components/GeoRouteMap";
 import CaseManagement from "../components/CaseManagement";
+import GlobalThreatDashboard from "../components/GlobalThreatDashboard";
 import { EmailEvidence, InvestigationSummary, BadgeInfo, CampaignCorrelationResult } from "../types/forensic";
 
 const lexend = Lexend({ subsets: ["latin"], variable: "--font-lexend" });
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<"ingest" | "vault" | "campaigns" | "cases">("ingest");
+  const [activeTab, setActiveTab] = useState<"ingest" | "vault" | "campaigns" | "cases" | "globe">("ingest");
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -198,6 +199,12 @@ export default function Home() {
                 setAutoScanResults(results);
                 refreshAllData();
               }}
+              onEvidenceIngested={(data, analysis) => {
+                setResult(data);
+                setStatus("Analysis Complete.");
+                refreshAllData();
+              }}
+              apiUrl={getApiUrl()}
             />
 
             {/* Render Auto Scan Results right on the screen */}
@@ -291,6 +298,12 @@ export default function Home() {
 
         {activeTab === "cases" && (
           <CaseManagement
+            apiUrl={getApiUrl()}
+          />
+        )}
+
+        {activeTab === "globe" && (
+          <GlobalThreatDashboard 
             apiUrl={getApiUrl()}
           />
         )}
