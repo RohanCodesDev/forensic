@@ -4,6 +4,7 @@ import { simpleParser, ParsedMail } from 'mailparser';
 export interface IngestionResult {
   parsed: ParsedMail;
   sha256Hash: string;
+  blockchainTxHash: string;
   spfResult: string;
   dkimResult: string;
   dmarcResult: string;
@@ -20,6 +21,10 @@ export interface IngestionResult {
 export const parseRawEmail = async (buffer: Buffer): Promise<IngestionResult> => {
   // Cryptographic SHA-256 hash of the evidence file buffer for non-repudiation
   const sha256Hash = crypto.createHash('sha256').update(buffer).digest('hex');
+
+  // Simulated Blockchain Transaction Hash (Theme: Blockchain & Cybersecurity)
+  // In a real scenario, this would be a real transaction hash returned from a smart contract (e.g., Ethereum/Polygon)
+  const blockchainTxHash = '0x' + crypto.randomBytes(32).toString('hex');
 
   // Parse the raw email buffer
   const parsed = await simpleParser(buffer);
@@ -82,6 +87,7 @@ export const parseRawEmail = async (buffer: Buffer): Promise<IngestionResult> =>
 
   const emailData = {
     sha256Hash,
+    blockchainTxHash,
     from: (parsed.from as any)?.text || '',
     to: (parsed.to as any)?.text || '',
     cc: (parsed.cc as any)?.text || '',
@@ -102,6 +108,7 @@ export const parseRawEmail = async (buffer: Buffer): Promise<IngestionResult> =>
   return {
     parsed,
     sha256Hash,
+    blockchainTxHash,
     spfResult,
     dkimResult,
     dmarcResult,

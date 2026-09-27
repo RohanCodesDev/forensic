@@ -154,6 +154,24 @@ export interface RiskEvaluation {
   factors: RiskFactor[];
 }
 
+export interface BreachRecord {
+  Name: string;
+  Title: string;
+  Domain: string;
+  BreachDate: string;
+  PwnCount: number;
+  Description: string;
+  DataClasses: string[];
+  IsVerified: boolean;
+}
+
+export interface BreachData {
+  email: string;
+  isBreached: boolean;
+  breachCount: number;
+  recentBreaches: BreachRecord[];
+}
+
 export interface FullAnalysisResult {
   threatLevel: string;
   riskEvaluation: RiskEvaluation;
@@ -163,6 +181,7 @@ export interface FullAnalysisResult {
   urlAnalysis: UrlAnalysisResult[];
   routeAnalysis: RouteAnalysis | null;
   threatIntel: ThreatIndicator[];
+  breachData?: BreachData | null;
   nlpAnalysis?: NlpAnalysis | null;
   aiAnalysis?: AiAnalysis | null;
 }
@@ -171,6 +190,7 @@ export interface EmailEvidence {
   id: string;
   filename: string;
   sha256Hash?: string | null;
+  blockchainTxHash?: string | null;
   from: string;
   to: string;
   cc?: string | null;
@@ -194,6 +214,7 @@ export interface InvestigationSummary {
   id: string;
   filename: string;
   sha256Hash?: string | null;
+  blockchainTxHash?: string | null;
   from: string;
   to: string;
   subject: string;

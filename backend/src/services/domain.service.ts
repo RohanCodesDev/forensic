@@ -1,4 +1,5 @@
 // backend/src/services/domain.service.ts
+import whoiser from 'whoiser';
 
 export const TARGET_BRANDS = [
   'paypal', 'apple', 'microsoft', 'google', 'amazon', 
@@ -50,7 +51,7 @@ export interface DomainAnalysisResult {
   anomalies: string[];
 }
 
-export const analyzeSenderDomain = (emailAddress: string | null, displayName: string | null): DomainAnalysisResult | null => {
+export const analyzeSenderDomain = async (emailAddress: string | null, displayName: string | null): Promise<DomainAnalysisResult | null> => {
   if (!emailAddress) return null;
 
   const parts = emailAddress.split('@');
@@ -115,6 +116,22 @@ export const analyzeSenderDomain = (emailAddress: string | null, displayName: st
           break;
         }
       }
+    }
+
+    // 3. WHOIS Domain Age Check (If not freemail)
+    try {
+      const whois = await (whoiser as any)(domain, { follow: 1 });
+      const firstServer: any = Object.values(whois)[0];
+      if (firstServer && firstServer['Created Date']) {
+        const createdDate = new Date(firstServer['Created Date'].toString());
+        const ageDays = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24);
+        
+        if (ageDays < 14) {
+          result.anomalies.push(`NEWLY REGISTERED DOMAIN: Sender domain '${domain}' was registered only ${Math.floor(ageDays)} days ago. High risk of phishing/throwaway infrastructure.`);
+        }
+      }
+    } catch (err) {
+      console.log(`[domain.service] WHOIS lookup failed or timed out for ${domain}`);
     }
   }
 

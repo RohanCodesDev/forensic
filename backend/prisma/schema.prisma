@@ -11,6 +11,7 @@ model Email {
   id              String          @id @default(uuid())
   filename        String
   sha256Hash      String?         // Cryptographic SHA-256 fingerprint of evidence buffer
+  blockchainTxHash String?        // Immutable smart contract or ledger transaction hash
   from            String
   to              String
   cc              String?
@@ -47,6 +48,7 @@ model AnalysisReport {
   urlAnalysis     Json?    // Embedded URLs and risk flags
   routeAnalysis   Json?    // Hop chain, delays, originating IP, geo
   threatIntel     Json?    // IOC hits across AbuseIPDB, URLhaus, etc.
+  breachData      Json?    // HIBP dark web credential leak results
   attachments     Json?    // Attachment metadata and risk flags
   nlpAnalysis     Json?    // NLP social engineering & BEC heuristic results
   aiAnalysis      Json?    // True LLM (Groq) semantic analysis

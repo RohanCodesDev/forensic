@@ -129,33 +129,90 @@ export const analyzeThreats = async (
 
   // 2. Domain Lookups
   for (const domain of uniqueDomains) {
-    if (offlineThreatDb[domain]) {
-      results.push(offlineThreatDb[domain]);
-    } else {
-      results.push({
-        value: domain,
-        type: 'DOMAIN',
-        source: 'Global Threat DB',
-        isMalicious: false,
-        riskScore: 0,
-        categories: ['Clean']
-      });
+    let handled = false;
+    if (process.env.VIRUSTOTAL_API_KEY) {
+      try {
+        const response = await fetch(`https://www.virustotal.com/api/v3/domains/${domain}`, {
+          headers: { 'x-apikey': process.env.VIRUSTOTAL_API_KEY }
+        });
+        const data = await response.json();
+        if (data && data.data && data.data.attributes) {
+          const stats = data.data.attributes.last_analysis_stats;
+          const maliciousVotes = stats.malicious || 0;
+          const riskScore = Math.min(maliciousVotes * 10, 100);
+          results.push({
+            value: domain,
+            type: 'DOMAIN',
+            source: 'VirusTotal (Live API)',
+            isMalicious: maliciousVotes > 0,
+            riskScore: riskScore,
+            categories: maliciousVotes > 0 ? ['Malicious Domain'] : ['Clean']
+          });
+          handled = true;
+        }
+      } catch (err) {
+        console.error(`VirusTotal API failed for domain ${domain}:`, err);
+      }
+    }
+
+    if (!handled) {
+      if (offlineThreatDb[domain]) {
+        results.push(offlineThreatDb[domain]);
+      } else {
+        results.push({
+          value: domain,
+          type: 'DOMAIN',
+          source: 'Global Threat DB',
+          isMalicious: false,
+          riskScore: 0,
+          categories: ['Clean']
+        });
+      }
     }
   }
 
   // 3. URL Lookups
   for (const url of uniqueUrls) {
-    if (offlineThreatDb[url]) {
-      results.push(offlineThreatDb[url]);
-    } else {
-      results.push({
-        value: url,
-        type: 'URL',
-        source: 'URLhaus',
-        isMalicious: false,
-        riskScore: 0,
-        categories: ['Clean']
-      });
+    let handled = false;
+    if (process.env.VIRUSTOTAL_API_KEY) {
+      try {
+        const urlId = Buffer.from(url).toString('base64url');
+        const response = await fetch(`https://www.virustotal.com/api/v3/urls/${urlId}`, {
+          headers: { 'x-apikey': process.env.VIRUSTOTAL_API_KEY }
+        });
+        const data = await response.json();
+        if (data && data.data && data.data.attributes) {
+          const stats = data.data.attributes.last_analysis_stats;
+          const maliciousVotes = stats.malicious || 0;
+          const riskScore = Math.min(maliciousVotes * 10, 100);
+          results.push({
+            value: url,
+            type: 'URL',
+            source: 'VirusTotal (Live API)',
+            isMalicious: maliciousVotes > 0,
+            riskScore: riskScore,
+            categories: maliciousVotes > 0 ? ['Malicious URL'] : ['Clean']
+          });
+          handled = true;
+        }
+      } catch (err) {
+        console.error(`VirusTotal API failed for url ${url}:`, err);
+      }
+    }
+
+    if (!handled) {
+      if (offlineThreatDb[url]) {
+        results.push(offlineThreatDb[url]);
+      } else {
+        results.push({
+          value: url,
+          type: 'URL',
+          source: 'URLhaus',
+          isMalicious: false,
+          riskScore: 0,
+          categories: ['Clean']
+        });
+      }
     }
   }
 

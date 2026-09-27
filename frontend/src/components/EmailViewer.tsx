@@ -1,7 +1,10 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
+import { useReactToPrint } from "react-to-print";
 import { ParsedEmailPreview, ExtractedUrlInfo } from "../utils/emlParser";
 import { EmailEvidence } from "../types/forensic";
 import InfoTooltip from "./InfoTooltip";
+import { ReportTemplate } from "./ReportTemplate";
+import SoarPlaybookCard from "./SoarPlaybookCard";
 
 interface EmailViewerProps {
   preview: ParsedEmailPreview;
@@ -21,6 +24,12 @@ export default function EmailViewer({
   const [showRawHeaders, setShowRawHeaders] = useState(false);
   const [copiedHeaders, setCopiedHeaders] = useState(false);
   const [copiedBody, setCopiedBody] = useState(false);
+
+  const printRef = useRef<HTMLDivElement>(null);
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: `Forensic_Report_${evidence?.id || 'Preview'}`,
+  });
 
   // Derive initials for avatar
   const senderInitials = useMemo(() => {
@@ -69,7 +78,7 @@ export default function EmailViewer({
       return <div className="text-zinc-500 italic">No readable text body in this email.</div>;
     }
 
-    let text = preview.textBody;
+    const text = preview.textBody;
     // Replace urgency keywords with tagged highlights
     // Sort keywords by length desc so longer phrases match first
     const sortedKeywords = [...preview.detectedUrgencyKeywords].sort((a, b) => b.length - a.length);
@@ -255,13 +264,14 @@ export default function EmailViewer({
             <div className="flex items-center gap-2 text-zinc-400 print-hidden">
               <button
                 type="button"
-                onClick={() => window.print()}
-                className="p-1.5 hover:bg-zinc-800 rounded-lg transition-colors"
-                title="Print email"
+                onClick={handlePrint as any}
+                className="p-1.5 hover:bg-zinc-800 rounded-lg transition-colors flex items-center gap-1.5 text-zinc-300 border border-zinc-700 bg-zinc-800"
+                title="Export Forensic Report (PDF)"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                 </svg>
+                <span className="text-xs font-semibold">Export PDF</span>
               </button>
               <button
                 type="button"
@@ -370,6 +380,13 @@ export default function EmailViewer({
 
                         <span className="text-zinc-500 text-right font-medium">subject:</span>
                         <span className="text-zinc-200">{preview.subject}</span>
+
+                        {evidence?.blockchainTxHash && (
+                          <>
+                            <span className="text-zinc-500 text-right font-medium">tx hash:</span>
+                            <span className="text-zinc-200 font-mono break-all text-[10px] text-emerald-400">{evidence.blockchainTxHash}</span>
+                          </>
+                        )}
 
                         <span className="text-zinc-500 text-right font-medium">security:</span>
                         <span className="text-zinc-200 flex items-center gap-1.5">
@@ -653,8 +670,18 @@ export default function EmailViewer({
               </div>
             )}
           </div>
+
+          {/* SOAR Playbook Card (Only show if evidence exists) */}
+          {evidence && (
+            <div className="mt-4">
+              <SoarPlaybookCard evidence={evidence} />
+            </div>
+          )}
         </div>
       )}
+      <div style={{ display: 'none' }}>
+        <ReportTemplate ref={printRef} evidence={evidence || null} />
+      </div>
     </div>
   );
 }

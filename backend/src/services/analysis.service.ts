@@ -6,6 +6,7 @@ import { calculateRiskScore } from './risk.service';
 import { analyzeNlp } from './nlp.service';
 import { analyzeWithAI } from './ai.service';
 import { scanAllAttachments } from './attachment.service';
+import { checkBreachStatus } from './breach.service';
 
 /**
  * Master Orchestrator for all Forensic Analysis Services
@@ -67,7 +68,7 @@ export const runFullAnalysis = async (emailData: any, parsed: any, attachments: 
     return match ? match[1].trim() : null;
   };
   const senderName = extractName(emailData.from);
-  const domainAnalysis = analyzeSenderDomain(fromAddress, senderName);
+  const domainAnalysis = await analyzeSenderDomain(fromAddress, senderName);
 
   if (domainAnalysis && domainAnalysis.anomalies.length > 0) {
     anomalies.push(...domainAnalysis.anomalies);
@@ -163,6 +164,12 @@ export const runFullAnalysis = async (emailData: any, parsed: any, attachments: 
     ...(malwareScanResults[idx] || {})
   }));
 
+  // Phase 15: Dark Web Breach Check (HIBP)
+  const breachData = await checkBreachStatus(fromAddress);
+  if (breachData && breachData.isBreached) {
+    anomalies.push(`DARK WEB INTELLIGENCE: Sender email '${fromAddress}' was found in ${breachData.breachCount} known data breaches. High risk of compromised account / BEC.`);
+  }
+
   return {
     threatLevel,
     riskEvaluation,
@@ -172,6 +179,7 @@ export const runFullAnalysis = async (emailData: any, parsed: any, attachments: 
     urlAnalysis,
     routeAnalysis,
     threatIntel,
+    breachData,
     nlpAnalysis,
     aiAnalysis
   };

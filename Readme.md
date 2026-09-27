@@ -64,7 +64,6 @@ ps106/
 │   ├── eslint.config.mjs
 │   └── README.md
 ├── Readme.md
-├── ppt_documentation.txt
 ├── spam_test_*.eml
 └── .gitignore
 ```
